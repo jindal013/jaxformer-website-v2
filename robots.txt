@@ -1,4 +1,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://jindal013.github.io/sitemap.xml
+Sitemap: https://jindal013.github.io/jaxformer-website-v2//sitemap.xml
