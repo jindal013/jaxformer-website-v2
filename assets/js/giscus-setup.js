@@ -20,7 +20,7 @@ function determineGiscusTheme() {
     src: "https://giscus.app/client.js",
     "data-repo": "jindal013/jaxformer-website-v2",
     "data-repo-id": "",
-    "data-category": "Comments",
+    "data-category": "General",
     "data-category-id": "",
     "data-mapping": "title",
     "data-strict": "1",
