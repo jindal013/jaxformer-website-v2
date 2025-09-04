@@ -3,8 +3,8 @@ const ninja = document.querySelector('ninja-keys');
 
 // add the home and posts menu items
 ninja.data = [{
-    id: "nav-about",
-    title: "about",
+    id: "nav-how-to-scale-your-model",
+    title: "How to Scale Your Model",
     section: "Navigation",
     handler: () => {
       window.location.href = "/";
