@@ -1,13 +1,12 @@
 ---
 layout: page
-title: submenus
+title: Sections
 nav: true
 nav_order: 8
 dropdown: true
 children:
-  - title: bookshelf
-    permalink: /books/
-  - title: divider
-  - title: blog
-    permalink: /blog/
+  - title: Part 0. Introduction
+    permalink: /
+  - title: Part 1. Tokenization
+    permalink: /tokenization/
 ---

@@ -1,9 +1,31 @@
 <header>
+
+  <script>
+    function goToTop() {
+      document.body.scrollTop = 0; // For Safari
+      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    }
+
+    // When the user scrolls down 20px from the top of the document, show the button
+    window.onscroll = function() {scrollFunction()};
+
+    function scrollFunction() {
+      // Get the button:
+      let mybutton = document.getElementById("top-button");
+
+      if (document.body.scrollTop > 40 || document.documentElement.scrollTop > 40) {
+        mybutton.style.display = "block";
+      } else {
+        mybutton.style.display = "none";
+      }
+  }
+  </script>
+
   <!-- Nav Bar -->
   <nav id="navbar" class="navbar navbar-light navbar-expand-sm {% if site.navbar_fixed %}fixed-top{% else %}sticky-top{% endif %}" role="navigation">
     <div class="container">
       {% if page.permalink != '/' %}
-        <a class="navbar-brand title font-weight-lighter" href="{{ site.baseurl }}/">
+        <a class="navbar-brand title font-weight-lighter" href="{{ site.baseurl }}">
           {% if site.title == 'blank' %}
             {% if site.first_name %}
               <span class="font-weight-bold">
@@ -40,6 +62,9 @@
         <span class="icon-bar bottom-bar"></span>
       </button>
 
+      <div class="left-button section-button"><a href="{{ page.previous_section_url }}"><svg viewBox="-78.5 0 512 512"><path d="M257 64L291 98 128 262 291 426 257 460 61 262 257 64Z" /></path></svg></a></div>
+      <div class="right-button section-button"><a href="{{ page.next_section_url }}"><svg viewBox="-78.5 0 512 512"><path d="M98 460L64 426 227 262 64 98 98 64 294 262 98 460Z" /></svg></a></div>
+
       <div class="collapse navbar-collapse text-right" id="navbarNav">
         <ul class="navbar-nav ml-auto flex-nowrap">
           {% for page in site.pages %}
@@ -55,6 +80,12 @@
               {% endif %}
             </a>
           </li>
+          
+      <li class="nav-item nav-hidden"><a class="nav-link" onclick="goToTop()" id="top-button" style="display: none;">Back to Top</a></li>
+      <li class="nav-item nav-hidden"><p class="nav-link"></p></li>
+      <li class="nav-item nav-hidden"><a class="nav-link" href="{{ page.previous_section_url }}">Previous Part</a></li>
+      <li class="nav-item nav-hidden"><a class="nav-link" href="{{ page.next_section_url }}">Next Part</a></li>
+      <li class="nav-item nav-hidden"><p class="nav-link"></p></li>
 
           <!-- Other pages -->
           {% assign sorted_pages = site.pages | sort: 'nav_order' %}
