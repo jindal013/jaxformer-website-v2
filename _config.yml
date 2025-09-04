@@ -220,6 +220,8 @@ exclude:
   - _posts/
   - _projects/
   - _books/
+  - _news/
+  - _bibliography/
   - README.md
   - readme_preview/
   - vendor
