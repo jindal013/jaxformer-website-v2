@@ -1,0 +1,31 @@
+<div class="base-grid appendix-entry">
+  <h3 style="grid-column: 0;">Citation</h3>
+  <p class="author-footnote">For attribution in academic contexts, please cite this work as:</p>
+
+  <div class="author-footnote">
+  {% capture citation_code -%}
+  ```bibtex
+    Makkar et al., "Jaxformer", University of Waterloo, online, 2025.
+  ```
+  {%- endcapture %}
+  {{ citation_code | markdownify }}
+  </div>
+
+  <p class="author-footnote">or as a BibTeX entry:</p>
+
+  <div class="author-footnote">
+  {% capture citation_code -%}
+  ```bibtex
+    @article{scaling-book,
+      title = {Jaxformer},
+      author = {Makkar, Aditya and Makkar, Divya and Jindal, Chinmay},
+      howpublished = {Online},
+      note = {Retrieved from https://jaxformer.com},
+      year = {2025}
+    }
+  ```
+  {%- endcapture %}
+  {{ citation_code | markdownify }}
+  </div>
+
+</div>
