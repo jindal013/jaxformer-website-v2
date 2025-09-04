@@ -1,9 +1,9 @@
 ---
 layout: distill
 title: "Jaxformer"
-subtitle: "A Zero-to-One Guide on Scaling Modern Transformers with N-Dimensional Parallelism"
+subtitle: "Scaling Modern Transformers"
 permalink: /
-description: "Description goes here. see deepmind for reference."
+description: "This is a a zero-to-one guide on scaling modern transformers with n-dimensional parallelism"
 date: 2025-09-04
 future: true
 htmlwidgets: true
