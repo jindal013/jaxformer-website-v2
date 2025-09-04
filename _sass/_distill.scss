@@ -187,179 +187,89 @@ d-appendix {
 }
 
 @media (max-width: 1200px) {
-
   .subtitle-links {
-
     display: none;
-
   }
-
 }
-
-
 
 .img-small {
-
   max-width: 500px;
-
   display: block;
-
   margin-left: auto;
-
   margin-right: auto;
-
 }
-
-
-
-
 
 // Custom CSS from jaaustin@
 
-
-
 d-footnote {
-
   display: inline-block;
-
 }
-
-
 
 d-article li {
-
   margin-bottom: 5px !important;
-
-
-
   p {
-
     margin-bottom: 10px !important;
-
   }
-
 }
-
-
 
 d-article> :nth-child(2) {
-
   margin-top: 0px !important;
-
 }
-
-
 
 d-article d-contents nav div {
-
   margin-bottom: 0.3em;
-
 }
-
-
 
 .algorithm {
-
   padding: 10px;
-
   margin-top: 5px;
-
   margin-bottom: 15px;
-
   border-style: dashed;
-
   border-width: 1px;
-
   background-color: var(--global-algorithm-color);
-
 }
-
-
 
 .algorithm li {
-
   margin-bottom: 0px;
-
 }
-
-
 
 .takeaway {
-
   background-color: var(--global-takeaway-color);
-
   padding: 10px;
-
   border-radius: 5px;
-
 }
-
-
 
 .announce {
-
   background-color: var(--global-announce-color);
-
   padding: 10px;
-
   border-radius: 5px;
-
   font-weight: 400;
-
 }
-
-
 
 .next-section {
-
   padding: 15px;
-
   border-radius: 5px;
-
   text-align: justify;
-
   border-style: dashed;
-
   border-width: 1px;
-
 }
-
-
 
 d-title a {
-
   color: var(--global-theme-color) !important;
-
 }
-
-
 
 h3 {
-
   margin-top: 1em !important;
-
 }
-
-
 
 .caption {
-
   color: var(--global-text-color);
-
   margin-bottom: 0px;
-
-
-
   text-align: justify;
-
 }
 
-
-
 d-footnote {
-
   color: black !important;
-
 }
 
 
