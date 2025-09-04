@@ -9,7 +9,7 @@ future: true
 htmlwidgets: true
 hidden: false
 
-giscus_comments: false
+giscus_comments: true
 
 section_number: 0
 
