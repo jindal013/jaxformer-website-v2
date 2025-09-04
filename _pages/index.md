@@ -1,7 +1,7 @@
 ---
 layout: distill
 title: "Jaxformer"
-subtitle: "A zero-to-one guide on scaling modern transformers with n-dimensional parallelism."
+subtitle: "A Zero-to-One Guide on Scaling Modern Transformers with N-Dimensional Parallelism"
 permalink: /
 description: "NEED TO REPLACE THIS: Training LLMs often feels like alchemy, but understanding and optimizing the performance of your models doesn't have to. This book aims to demystify the science of scaling language models: how TPUs (and GPUs) work and how they communicate with each other, how LLMs run on real hardware, and how to parallelize your models during training and inference so they run efficiently at massive scale. If you've ever wondered “how expensive should this LLM be to train” or “how much memory do I need to serve this model myself” or “what's an AllGather”, we hope this will be useful to you."
 date: 2025-09-04
