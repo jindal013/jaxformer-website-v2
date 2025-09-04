@@ -205,17 +205,17 @@ exclude:
   - lighthouse_results/
   - package.json
   - package-lock.json
-  - _pages/about_einstein.md
-  - _pages/about.md
-  - _pages/blog.md
-  - _pages/books.md
-  - _pages/cv.md
-  - _pages/news.md
-  - _pages/profiles.md
-  - _pages/publications.md
-  - _pages/repositories.md
-  - _pages/teaching.md
-  - _pages/projects.md
+  - _pages/other/about_einstein.md
+  - _pages/other/about.md
+  - _pages/other/blog.md
+  - _pages/other/books.md
+  - _pages/other/cv.md
+  - _pages/other/news.md
+  - _pages/other/profiles.md
+  - _pages/other/publications.md
+  - _pages/other/repositories.md
+  - _pages/other/teaching.md
+  - _pages/other/projects.md
   - purgecss.config.js
   - _posts/
   - _projects/

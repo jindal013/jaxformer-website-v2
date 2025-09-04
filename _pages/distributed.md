@@ -1,27 +1,24 @@
 ---
 layout: distill
-title: "Jaxformer"
-subtitle: "A Zero-to-One Guide on Scaling Modern Transformers with N-Dimensional Parallelism"
-permalink: /
-description: "Description goes here. see deepmind for reference."
+title: "Distributed Training"
+permalink: /distributed/
+description: "Description goes here. see deepmind for reference"
 date: 2025-09-04
 future: true
 htmlwidgets: true
 hidden: false
 
-giscus_comments: false
+section_number: 3
 
-section_number: 0
+previous_section_url: ../main_model
+previous_section_name: "Part 2: Main Model"
 
-previous_section_url: ""
-previous_section_name: "Part 0: Intro"
-
-next_section_url: ../tokenization
-next_section_name: "Part 1: Tokenization"
+next_section_url: ../dataset
+next_section_name: "Part 4: Dataset & Config"
 
 bibliography: main.bib
 
-citation: true
+giscus_comments: true
 
 authors:
   - name: Aditya Makkar
@@ -34,12 +31,17 @@ authors:
     url: "https://www.linkedin.com/in/chinmayjindal/"
 
 # Add a table of contents to your post.
-#   - make sure that TOC names match the actual section names
+#   - make sure that TOC names matcAh the actual section names
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
-  - name: High-Level Outline
-  - name: Links to Sections
+
+  - name: Where Does the Time Go?
+  - subsections:
+    - name: "Visualizing rooflines"
+    - name: "Matrix multiplication"
+    - name: "Network communication rooflines"
+  - name: A Few Problems to Work
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -61,4 +63,4 @@ _styles: >
   }
 ---
 
-OK it starts here now i guess
+Main content goes here. to change: TOC, Gisucus. 
