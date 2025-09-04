@@ -60,8 +60,17 @@
     <div class="post distill">
       <d-title>
         <h1>{{ page.title }}</h1>
+        {% if page.subtitle %}
+        <p><span class="subtitle">{{ page.subtitle }}</span> <span class="subtitle-links">({{ page.previous_section_name
+            }} | <a href="{{ page.next_section_url }}">{{ page.next_section_name }}</a>)</span></p>
+        {% else %}
+        <p>Part {{ page.section_number }} of <a href="{{ site.baseurl }}">{{ site.title }}</a> (<a
+            href="{{ page.previous_section_url }}">{{ page.previous_section_name }}</a> | <a
+            href="{{ page.next_section_url }}">{{ page.next_section_name }}</a>)</p>
+        {% endif %}
         <p>{{ page.description }}</p>
       </d-title>
+
       {% if page.authors %}
         <d-byline></d-byline>
       {% endif %}
@@ -98,19 +107,6 @@
 
       <d-bibliography src="{{ page.bibliography | prepend: '/assets/bibliography/' | relative_url }}"></d-bibliography>
 
-      <d-article>
-        {% if site.related_blog_posts and site.related_blog_posts.enabled %}
-          {% if page.related_posts == null or page.related_posts %}
-            {% include related_posts.liquid %}
-          {% endif %}
-        {% endif %}
-        <br>
-        <br>
-        {% if site.disqus_shortname and page.disqus_comments %}{% include disqus.liquid %}{% endif %}
-        {% if site.giscus.repo and page.giscus_comments %}
-          {% include giscus.liquid %}
-        {% endif %}
-      </d-article>
     </div>
 
     <!-- Footer -->

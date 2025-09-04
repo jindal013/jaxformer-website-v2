@@ -1,61 +1,45 @@
 ---
 layout: distill
-title: "How to Scale Your Model"
-subtitle: "A Systems View of LLMs on TPUs"
+title: "Jaxformer"
+subtitle: "A Modern Transformer with N-D Parallelism"
 permalink: /
-description: "Training LLMs often feels like alchemy, but understanding and optimizing the performance of your models doesn't have to. This book aims to demystify the science of scaling language models: how TPUs (and GPUs) work and how they communicate with each other, how LLMs run on real hardware, and how to parallelize your models during training and inference so they run efficiently at massive scale. If you've ever wondered “how expensive should this LLM be to train” or “how much memory do I need to serve this model myself” or “what's an AllGather”, we hope this will be useful to you."
-date: 2025-02-04
+description: "NEED TO REPLACE THIS: Training LLMs often feels like alchemy, but understanding and optimizing the performance of your models doesn't have to. This book aims to demystify the science of scaling language models: how TPUs (and GPUs) work and how they communicate with each other, how LLMs run on real hardware, and how to parallelize your models during training and inference so they run efficiently at massive scale. If you've ever wondered “how expensive should this LLM be to train” or “how much memory do I need to serve this model myself” or “what's an AllGather”, we hope this will be useful to you."
+date: 2025-09-04
 future: true
 htmlwidgets: true
 hidden: false
 
-giscus_comments: true
+giscus_comments: false
 
 section_number: 0
 
 previous_section_url: ""
 previous_section_name: "Part 0: Intro"
 
-next_section_url: roofline
-next_section_name: "Part 1: Rooflines"
+next_section_url: ../tokenization
+next_section_name: "Part 1: Tokenization"
 
 bibliography: main.bib
 
 citation: true
 
 authors:
-  - name: Jacob Austin
-    url: "https://www.jacobaustin.org/"
-    affiliations:
-      name: Google DeepMind
-  - name: Sholto Douglas
-    url: "https://x.com/_sholtodouglas"
-  - name: Roy Frostig
-    url: "https://cs.stanford.edu/~rfrostig/"
-  - name: Anselm Levskaya
-    url: "https://anselmlevskaya.com/"
-  - name: Charlie Chen
-    url: "https://x.com/charliexychen"
-  - name: Sharad Vikram
-    url: "https://sharadvikram.com/"
-  - name: Federico Lebron
-    url: "https://fedelebron.com/"
-  - name: Peter Choy
-    url: "https://x.com/pchoy95"
-  - name: Vinay Ramasesh
-    url: "https://x.com/vinayramasesh"
-  - name: Albert Webson
-    url: "https://representation.ai/"
-  - name: Reiner Pope<sup>*</sup>
-    url: https://x.com/reinerpope
+  - name: Aditya Makkar
+    url: "https://www.linkedin.com/in/aditya-makkar-76a23a246/"
+    affiliations: 
+      name: University of Waterloo
+  - name: Divya Makkar
+    url: "https://www.linkedin.com/in/divya-makkar000/"
+  - name: Chinmay Jindal
+    url: "https://www.linkedin.com/in/chinmayjindal/"
 
 # Add a table of contents to your post.
 #   - make sure that TOC names match the actual section names
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
-# toc:
-#   - name: High-Level Outline
-#   - name: Links to Sections
+toc:
+  - name: High-Level Outline
+  - name: Links to Sections
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
