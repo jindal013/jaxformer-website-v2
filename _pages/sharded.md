@@ -1,8 +1,8 @@
 ---
 layout: distill
-title: "Sharded Model"
+title: "Inside the Sharded Model:<br>3-D Parallelism"
 permalink: /sharded/
-description: "Here we discuss 4 main parallelism techniques used for scaling LLMs: data parallelism, fully-sharded data parallelism (FSDP), pipeline parallelism and tensor parallelism. For each, we discuss their theory and a scalable implementation."
+description: "Here we discuss the 4 main parallelism techniques used for scaling LLMs: data parallelism, fully-sharded data parallelism (FSDP), pipeline parallelism and tensor parallelism. For each, we discuss their theory and a scalable implementation."
 date: 2025-09-05
 future: true
 htmlwidgets: true
@@ -33,12 +33,15 @@ authors:
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
-  - name: Where Does the Time Go?
+  - name: Foundations of Sharding
+  - name: Data Parallelism
+  - name: Pipeline Parallelism 
+  - name: Tensor Parallelism
   - subsections:
-      - name: "Visualizing rooflines"
-      - name: "Matrix multiplication"
-      - name: "Network communication rooflines"
-  - name: A Few Problems to Work
+      - name: "RMSNorm"
+      - name: "Embedding"
+      - name: "RoPE"
+      - name: "Attention"
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -59,6 +62,8 @@ _styles: >
     font-size: 16px;
   }
 ---
+
+## Foundations of Sharding
 
 When scaling models in JAX, we need to explicitly control how the data and computations are partitioned. This is where the intuition behind manual parallelism techniques in JAX comes in.
 
@@ -82,7 +87,7 @@ from jax.experimental.shard_map import shard_map
 
 The configuration of these devices can be shown by calling `jax.devices()` which returns
 
-```
+```python
 [CpuDevice(id=0),
 CpuDevice(id=1),
 CpuDevice(id=2),
@@ -144,7 +149,6 @@ def vec_addition(a, b):
     local_result = jax.lax.all_gather(local_result, axis_name="y", tiled=True, axis=1)
     return local_result
 
-
 shard_add = shard_map(
     vec_addition,
     mesh=mesh,
@@ -158,7 +162,8 @@ visualize_array_sharding(c)
 ```
 
 When visualizing the output, the following is shown where c remains the same sum as above. It shows that c is replicated the same across all devices.
-![[Pasted image 20250828123858.png]]
+
+{% include figure.liquid path="assets/img/sharded/2.png" class="img-fluid" %}
 
 That concludes an introduction to distributed training in JAX. These principles are then scaled up across higher-dimensional arrays to form the basis of modern distributed techniques including data, pipeline and tensor parallelism.
 
@@ -176,13 +181,11 @@ def loss_fn(...):
 
 The advantages of data parallelism allow for large-scale training with low communication bottlenecks as there is only one communication required. One of the main disadvantages of it is that the model is required to fit on each device, this can be infeasible as the model grows, hence data parallelism is often combined with other strategies including pipeline and tensor parallelism.
 
-![[Pasted image 20250831120513.png]]
-_Data parallelism with the model replicated across all GPUs whilst the batch is split into smaller batch sizes_
+{% include figure.liquid path="assets/img/sharded/3.png" class="img-fluid" caption="Data parallelism with the model replicated across all GPUs whilst the batch is split into smaller batch sizes" %}
 
 Pure data parallelism doesn't require changes in our model class. However, the biggest downside of data parallelism is that the model needs to be replicated in each instance. This leads to large memory usage. A way to fix this is to use an extension of DP known as Fully-Sharded Data Parallelism, where each model keeps a subset of the parameters and performs all-gathers to ensure that only a single instance of the parameters are replicated. The same goes for the gradients and optimizer states. To implement this, we only need to ensure the parameters are sharded since our gradients and optimizer state are as computed and sharded in the same partition spec as the parameters they represent.
 
-![[pasted fsdp.svg]]
-_The third state of the zero optimizer above is equivalent to FSDP where all the gradients, parameters and optimizer states are sharded._
+{% include figure.liquid path="assets/img/sharded/4.svg" class="img-fluid" caption="The third state of the zero optimizer above is equivalent to FSDP where all the gradients, parameters and optimizer states are sharded" %}
 
 We implement FSDP on the weight matrix for the dense network only. Since every dense layer is wrapped in our own class, this is reasonable for parameter sharding. We begin by writing the Dense module ourselves in terms of Flax Linen parameters instead of using the class given by Flax. We initialize a kernel which is our weights matrix and a bias. Then, we cast to the desired data type, perform a matrix multiplication and add the bias.
 
@@ -271,18 +274,15 @@ class Dense(nn.Module):
 
 Pipeline parallelism is another parallelism technique that allows for training LLMs across distributed nodes. While data parallelism, works well for smaller to intermediate models, when the model size increases, it becomes difficult to scale as the model can no longer fit on a single device. Hence, in such cases, strategies that parallelize the model instead of the data need to be used. In pipeline parallelism, the model is split vertically. This means the layers of the model are partitioned on different devices, for example, a transformer with 16 layers and 4 homogenous devices are split evenly (4 consecutive layers per device). The input batch passes through the first device with the first `n` layers, then the output of that device is passed to the next device through the next `n` layers and etc. The backwards pass is formed in the opposite direction from the last device, computing the gradient for the last `n` layers, then computing the back propagation through the next device and etc. Pipeline Parallelism is advantageous because each device requires a portion of the model, allowing for more scaling as memory requirements are reduced. Due to the nature of this parallelism, the following computation graph can be created.
 
-![[Pasted image 20250831152135.png]]
-_Naive Pipeline Parallelism_
+{% include figure.liquid path="assets/img/sharded/5.png" class="img-fluid" caption="Naive Pipeline Parallelism" %}
 
 Looking at the figure, it is evident that the forward pass of each state is dependent on the device before it and as a result, in the image above, the devices are idle for a large amount of time. This causes an low underutilization of devices as at any time step, only one device is being used. Hence, the GPipe Algorithm was introduced to increase device efficiency by splitting the batch size into mini batches (smaller, equal-sized batches) for which the forwards and backwards pass can be computed sequentially. Now, each device can immediately start working on the next micro-batch and can be overlapped over each partition. The idle time of the device is called a bubble, which can be reduced by choosing a smaller size of micro-batches.
 
-![[Pasted image 20250831153800.png]]
-_GPipe Pipeline Parallelism_
+{% include figure.liquid path="assets/img/sharded/6.png" class="img-fluid" caption="GPipe Pipeline Parallelism" %}
 
 When looking at the fraction of time wasted by the bubble, the formula can be derived looking at the following image for naive pipeline parallelism.
 
-![[Pasted image 20250831152348.png]]
-_Naive Pipeline Parallelism with bubbles displayed_
+{% include figure.liquid path="assets/img/sharded/7.png" class="img-fluid" caption="Naive Pipeline Parallelism with bubbles displayed" %}
 
 To calculate the portion of time as a bubble, assume $n$ to be the number of devices. Then, the amount of idle time for the top left bubble can be calculated as the arithmetic sum between 1 and n-1.
 
@@ -304,8 +304,7 @@ $$
 
 It is evident that as n gets larger, the fraction of time wasted approaches 1, signifying heavy inefficiencies. Computing this ratio for the GPipe Algorithm yields the following.
 
-![[Pasted image 20250831155401.png]]
-_Bubble Image with GPipe_
+{% include figure.liquid path="assets/img/sharded/8.png" class="img-fluid" caption="Bubble Image with GPipe" %}
 
 To calculate the total bubble ration we can use the same procedure as above to calculate the total bubble time as:
 
@@ -675,7 +674,6 @@ def pipeline(...):
 
 	KV_cache = []
 	KR_cache = []
-
 ```
 
 As explained above, the total number of steps in the forward pass is `n + m - 1` where $n$ is the number of devices , $m$ is the total microbatches. However this is a simplification, as the true number of steps is $L  + m - 1$ where $L$ is the total number of layers since we now have to consider if there is more then 1 layer per device. In each stage we have to do 3 steps. The first is to load the correct data and prepare the arguments (KV-cache, etc.), the next is to actually call the forward function and the next is to communicate the data. The first variable is `batch_idx`, which indicates the current microbatch being processed by the device. For each interval of `microbatch_per_device`, the device uses its local inputs, after which it rotates to obtain the next batch from another device. After we have gone through all the microbatches (`i > microbatches - 1`), the `batch_idx` becomes meaningless (we have reached the stage where the first device no longer is providing useful outputs). Similarly the `layer_idx` tells us which index of the output we are on. It only becomes useful after $i > L - 2$ since that is when the first microbatch has passed through the last layer. After we have completed `microbatches_per_device` steps, we rotate the output to start filling it for the next device's microbatches. After we have computed both indexes, we set the state's 0 index if we are on the first device for pipeline (essentially the device that holds the first layer) and set it equal to the `batch_idx` of the input, otherwise we keep the current state value. Similarly we set the `state_idx`'s 0 index at the 0 device to be 1 indicating it is no longer filled with `nan` values. We also make enough keys for the layers on this device for the forward computation and if the cache is not `None`, we make a tuple of the cache values.
@@ -698,7 +696,6 @@ def pipeline(...):
 			current_cache = [cache[0][i], None]
 			if cache[1] is not None:
 				current_cache[1] = cache[1][i]
-
 ```
 
 We can now use the `jax.vmap` function to use vectorize the forward pass for the layers on this device. The function to vectorize over is the function given as a parameter and we pass in all the variables we have prepared. This now becomes our new state and cache.
@@ -711,7 +708,6 @@ def pipeline(...):
 		state, out_cache = jax.vmap(fn)(
 			state_idx, state, stage_params, current_cache, layer_keys
 		)
-
 ```
 
 We are now on the final step which is to prepare the outputs. We append the out cache again identical to the `Tranformer` class and set the outputs at the `layer_idx` to the last state if this is the last device since that is the last layer.
@@ -846,7 +842,7 @@ def pipe_step(self, params, x, key, train, cache=None):
 	return logits, out_cache
 ```
 
-# Tensor Parallelism
+## Tensor Parallelism
 
 Another model parallelism (splits the model across devices instead of data) strategy is tensor parallelism. In this strategy the model is split across it's feature dimension. An advantage of tensor parallelism is that it doesn't face similar problems to pipeline parallelism's bubble problems because all devices work on the same batch of data together. Tensor parallelism strongly relies on communication between different devices and is thus a popular strategy when training on TPUs due to the ICI connections between a large number of chips in a single pod (think nodes for GPUs). Suppose the model had a feature size of 512 and there were 4 devices, then there would exist 128 consecutive features across the different devices. Since the layers/modules have an intra-computation split, the devices must communicate features and outputs. There are two main strategies to do this however for our case we have chosen the scatter strategy.
 
@@ -854,15 +850,13 @@ The scatter strategy needs to be done for every layer. Below is the scatter stra
 
 Suppose we are performing a matrix multiplication between $A \in \mathbb{R}^{m \times n}$ and $X \in \mathbb{R}^{n \times d}$. Using this strategy, the columns of $A$ and rows of $X$ are split across the $n$ devices, thus each device has vectors $a \in \mathbb{R}^{m \times 1}$ and $x \in \mathbb{R}^{1 \times d}$. Each device $k$, can compute $Y^k \in \mathbb{R}^{m \times d} = ax$, which contains a portion of the sum of $Y$, as $Y_{ij} = \sum_{k=1}^n Y^k_{ij}$. Hence, we need to sum the partial matrices on each device to get the final vector $y$, which can be split along the columns across the devices using the `psum scatter` strategy.
 
-![[Pasted image 20250831170757.png]]
-_Tensor Parallelism on a TP Dense Layer_
+{% include figure.liquid path="assets/img/sharded/9.png" class="img-fluid" caption="Tensor Parallelism on a TP Dense Layer" %}
 
-### RmsNORM
+### RMSNorm
 
 For RMSNorm since the hidden dimension is split across devices each device first computes its local sum of squares. To get the global sum we use `jax.lax.psum(..., axis_name)` which performs an all-reduce so that every device receives the total $\sum_{i=1}^{n} x_i^2$. Finally, we compute the global hidden size by all-reducing each local `x.shape[-1]` then divide the RMS by this global dimension.
 
-![[Pasted image 20250831183419.png]]
-_Tensor Parallelism on RMS Norm_
+{% include figure.liquid path="assets/img/sharded/10.png" class="img-fluid" caption="Tensor Parallelism on RMS Norm" %}
 
 ```python
 class RMSNorm(nn.Module):
@@ -878,7 +872,7 @@ class RMSNorm(nn.Module):
         return x
 ```
 
-## Embedding
+### Embedding
 
 In this case, the embedding layer is also split across the devices. At the start of the forward pass, the input values are loaded as the shape $(B, \frac{T}{\text{tp size}})$ as the sequence length dimension is sharded along the TP axis. Note the idea of `T` being sharded is called sequence parallelism but for memory-bandwidth we begin by sharding the `T` dim across the tensor axis. After the embedding is applied on the inputs, their shape becomes $(B, \frac{T}{\text{tp size}}, C)$. Then, since the tensor should be split along the hidden dimension axis, the function `jax.lax.all_to_all(x, axis_name, split axis, concat_axis, tiled)` is applied on the inputs after the embedding layer `x`. The axis_name is along the tensor parallelism axis (`tp`), the split_axis denotes along which axis the TP sharding should occur - in this case it is the hidden dim. Since `all_to_all` syntax doesn't allow for negative numbers `split_axis=x.ndim-1`, which is equivalent to the -1 dim. The `concat_axis=x.ndim-2`, or the -2 dimension which indicates that all T across the devices should be concatenated as denoted by `tiled=True`. Hence the final shape now becomes $(B, T, \frac{C}{\text{tp size}})$ as intended. Similarly after the `self.norm` is applied we do the inverse all-to-all to obtain $(B, \frac{T}{\text{tp size}}, C)$ and then use the normal weight tying to obtain $(B, \frac{T}{\text{tp size}}, V)$ . Then in the loss function, we can `pmean` across the `tp` axis since tokens on one `tp` axis device's are compute with weights on another `tp` axis device (this will be implemented later in the main training script).
 
@@ -904,12 +898,11 @@ class Embedding(nn.Module):
         return x
 ```
 
-## RoPE
+### RoPE
 
 The next module that needs to change is the RoPE logic since the cos/sin matrices need to spilt for the channels that are on the device. Thus we only need to make changes in the setup method to slice the matrices. To do this, we find the current index in the `tp` axis and the size to find how many channels will be on each device, we call this the `slice_factor`. Then we use `jax.lax.dynamic_slice_in_dim` which is essentially `arr[..., start_idx: start_idx + length` but works under a `jit` context with dynamic values (values not known at compile time). We find the `start_idx` by multiplying the `idx * slice_factor` since that adds up the slices for the previous devices. This is done on the `axis=-1` since that is the channel axis.
 
-![[pasted 10.png]]
-\_RoPE under Tensor Parallelism
+{% include figure.liquid path="assets/img/sharded/11.png" class="img-fluid" caption="RoPE under Tensor Parallelism" %}
 
 ```python
 class RoPE(nn.Module):
@@ -927,7 +920,7 @@ class RoPE(nn.Module):
         )
 ```
 
-## Attention
+### Attention
 
 When applying tensor parallelism to `MLA`, we have to consider how sharding will work when performing scaled-dot product attention. The easiest approach is to shard the heads along the tensor axis since they are independent of each other when performing the attention operation. After splitting the local `q,k,v` across heads, the current interpretation is that for all heads we have a fraction of the keys, queries and values (split across `tp`). Thus we can perform an all-to-all to accumulate all the `qkv` across all heads and then split the heads across the `tp` axis.
 
