@@ -36,7 +36,12 @@ authors:
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
+  - name: Code & Contact
+  - name: Introduction
   - name: Prerequisites
+  - name: Goals
+  - name: Overview
+  - name: Why This Matters
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -81,13 +86,51 @@ _styles: >
   });
 </script>
 
-Find the complete code at the GitHub repository: [JAXformer](https://github.com/divyamakkar0/Jaxformer).
+## Code & Contact
+
+Find the complete code for this guide on our [GitHub repository](https://github.com/divyamakkar0/Jaxformer).  
+More information about the authors can be found on the [Conclusions page](https://jaxformer.com/conclusion).
+
+## Introduction
+
+Modern transformers are at the heart of today’s deep learning systems, but taking them from a single-GPU prototype to a multi-node cluster is not straightforward. Scaling efficiently requires understanding how data moves through the hardware, how models can be split across devices, and how training infrastructure ties everything together.  
+
+This guide is a practical, code-first walkthrough of scaling modern transformers in JAX. Our goal is to bridge the gap between high-level scaling theory and hands-on implementation. By the end, you should feel comfortable building a SOTA transformer model that runs on TPUs/GPUs, sharding it across devices, and training it at scale with techniques used in state-of-the-art systems. We wrote this guide because, as learners ourselves, we experienced the same lack of practical resources.
 
 ## Prerequisites
 
 Prior to reading this guide, we assume you are famiilar with the following topics and resources (or equivalent material):
 
-- Basic transformer implementations
-- Basic familiarity with distributed training ideas
-- JAX basics. Read through their [docs](https://docs.jax.dev/en/latest/)
+- Basic Transformer implementations
+- Familiarity with Distributed Training ideas
+- JAX basics: we recommend that you start reading through their [docs](https://docs.jax.dev/en/latest/)
 - Andrej Karpathy's [Zero-to-Hero Neural Network](https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ) series
+
+## Goals
+
+By the end of this guide, you should be able to:
+
+- Understand how to tokenize and stream large datasets efficiently for training.  
+- Estimate the compute, memory, and communication costs of running a transformer model.  
+- Select and combine parallelism schemes (data, tensor, pipeline, FSDP, MoE) for a given hardware setup.  
+- Confidently configure and launch distributed training runs on multi-host TPU or GPU clusters.  
+- Recognize bottlenecks that prevent strong scaling and know how to address them.  
+
+This is v1.0. We aim to update the guide sporadically as we implement more complex ideas and architectures in the future.
+
+## Overview
+
+Here’s how the guide is structured:
+
+- **[Part 1: Tokenization at Scale](tokenization)** — how to preprocess massive datasets, shard them, and checkpoint safely for distributed training.  
+- **[Part 2: Base Model](base_model)** — building a transformer in JAX with modules like RMSNorm, RoPE, and Multi-latent Attention.  
+- **[Part 3: Sharded Model](sharded)** — introducing parallelism strategies (data, tensor, pipeline, FSDP) and applying them to transformer layers.  
+- **[Part 4: Distributed Training](distributed_training)** — how to set up TPU/GPU clusters, manage checkpoints, and synchronize training loops.  
+- **[Part 5: Dataset & Configs](dataset_class)** — structured configs for datasets, hyperparameters, and runtime options.  
+- **[Part 6: Mixture of Experts](moe)** — implementing and training MoE layers, covering routing, stability, and efficiency challenges.  
+- **[Part 7: Final Run](final_run)** — putting it all together: multi-host scripts, launching large runs across TPU pods, and analyzing results.  
+- **[Part 8: Conclusions](conclusion)** — lessons learned, future directions like DualPipe and expert parallelism, and additional resources.  
+
+## Why This Matters
+
+Scaling isn’t just about making models bigger. It's also about making them efficient. At today’s frontier, even “small” LLMs run at the edge of hardware limits, and poor scaling can make promising ideas unusable in practice. Understanding how to tokenize huge datasets, shard parameters, overlap communication with compute, and keep accelerators busy is what makes modern research and production possible.  
