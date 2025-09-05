@@ -252,7 +252,7 @@ x_d
 \end{bmatrix}
 $$
 
-where $m$ is the time position and each $\left( 2 \times 2 \right)$ $R(m)$ block is
+where $m$ is the time position and each $( 2 \times 2)$ $R(m)$ block is
 
 $$
 R(m\theta_k) =
