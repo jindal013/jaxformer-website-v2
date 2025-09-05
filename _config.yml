@@ -1,7 +1,7 @@
-title: "Jaxformer" # the website title (if blank, full name will be used instead)
+title: "Jaxformer: Scaling Modern Transformers" # the website title (if blank, full name will be used instead)
 first_name:
 middle_name:
-last_name: 
+last_name:
 contact_note: >
 description: > # the ">" symbol means to ignore newlines until "footer_text:"
   A zero-to-one guide on scaling modern transformers with n-dimensional parallelism.
@@ -10,7 +10,7 @@ footer_text: >
   Hosted by <a href="https://pages.github.com/" target="_blank">GitHub Pages</a>.
 keywords: jscaling, jax, llms, transformers, tpus, google, cloud, parallelism, distributed # add your own keywords or leave empty
 lang: en # the language of your site (for example: en, fr, cn, ru, etc.)
-icon: ⚛️ # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
+icon: jaxformer-icon.png # the emoji used as the favicon (alternatively, provide image name in /assets/img/)
 
 url: https://jaxformer.com # the base hostname & protocol for your site
 baseurl: # the subpath of your site, e.g. /blog/. Leave blank for root

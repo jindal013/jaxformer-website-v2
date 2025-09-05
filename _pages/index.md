@@ -25,13 +25,11 @@ citation: true
 
 authors:
   - name: Aditya Makkar
-    url: "https://www.linkedin.com/in/aditya-makkar-76a23a246/"
-    affiliations: 
-      name: University of Waterloo
+    url: "https://x.com/AdityaMakkar000"
   - name: Divya Makkar
-    url: "https://www.linkedin.com/in/divya-makkar000/"
+    url: "https://x.com/_DivyaMakkar"
   - name: Chinmay Jindal
-    url: "https://www.linkedin.com/in/chinmayjindal/"
+    url: "https://x.com/chinmayjindal_"
 
 # Add a table of contents to your post.
 #   - make sure that TOC names match the actual section names
@@ -60,5 +58,7 @@ _styles: >
     font-size: 16px;
   }
 ---
+
+{% include figure.liquid path="assets/img/banner.png" class="img-fluid" %}
 
 OK it starts here now i guess

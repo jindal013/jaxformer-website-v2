@@ -9,15 +9,15 @@ children:
     permalink: /
   - title: Part 1. Tokenization
     permalink: /tokenization/
-  - title: Part 2. Main Model
-    permalink: /main_model/
-  - title: Part 3. Distributed Training
-    permalink: /distributed/
+  - title: Part 2. Base Model # Base Model
+    permalink: /base_model/
+  - title: Part 3. Sharded Model # Sharded Model
+    permalink: /sharded/
   - title: Part 4. Dataset & Config
     permalink: /dataset/
-  - title: Part 5. Main Training Loop
-    permalink: /main_loop/
-  - title: Part 6. MoE Implementation
+  - title: Part 5. Distributed Training # Distributed Training
+    permalink: /distributed_training/
+  - title: Part 6. Mixture of Experts # Mixture of Experts
     permalink: /moe/
   - title: Part 7. Training Results
     permalink: /training/

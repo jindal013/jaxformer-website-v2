@@ -10,11 +10,11 @@ hidden: false
 
 section_number: 4
 
-previous_section_url: ../distributed
-previous_section_name: "Part 3: Distributed Training"
+previous_section_url: ../sharded
+previous_section_name: "Part 3: Sharded Model"
 
-next_section_url: ../main_loop
-next_section_name: "Part 5: Main Training Loop"
+next_section_url: ../distributed_training
+next_section_name: "Part 5: Distributed Training"
 
 bibliography: main.bib
 
@@ -22,25 +22,22 @@ giscus_comments: true
 
 authors:
   - name: Aditya Makkar
-    url: "https://www.linkedin.com/in/aditya-makkar-76a23a246/"
-    affiliations: 
-      name: University of Waterloo
+    url: "https://x.com/AdityaMakkar000"
   - name: Divya Makkar
-    url: "https://www.linkedin.com/in/divya-makkar000/"
+    url: "https://x.com/_DivyaMakkar"
   - name: Chinmay Jindal
-    url: "https://www.linkedin.com/in/chinmayjindal/"
+    url: "https://x.com/chinmayjindal_"
 
 # Add a table of contents to your post.
 #   - make sure that TOC names matcAh the actual section names
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
-
   - name: Where Does the Time Go?
   - subsections:
-    - name: "Visualizing rooflines"
-    - name: "Matrix multiplication"
-    - name: "Network communication rooflines"
+      - name: "Visualizing rooflines"
+      - name: "Matrix multiplication"
+      - name: "Network communication rooflines"
   - name: A Few Problems to Work
 
 # Below is an example of injecting additional post-specific styles.
@@ -63,4 +60,4 @@ _styles: >
   }
 ---
 
-Main content goes here. to change: TOC, Gisucus. 
+Main content goes here. to change: TOC, Gisucus.
