@@ -91,7 +91,7 @@
 <span class="k">for</span> <span class="n">tokens</span><span class="p">,</span> <span class="n">doc_id</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">.</span><span class="nf">imap</span><span class="p">(</span><span class="n">tokenize</span><span class="p">,</span> <span class="n">fw</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
     <span class="bp">...</span>
 
-	<span class="k">if</span> <span class="n">shard_index</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">shard_index</span> <span class="o">&lt;</span> <span class="n">TEST_SPLIT</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">shard_index</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">shard_index</span> <span class="o">&lt;</span> <span class="n">TEST_SPLIT</span><span class="p">:</span>
         <span class="n">split</span> <span class="o">=</span> <span class="sh">'</span><span class="s">test/</span><span class="sh">'</span>
         <span class="n">shard_index_number</span> <span class="o">=</span> <span class="n">shard_index</span>
     <span class="k">else</span><span class="p">:</span>
@@ -117,7 +117,7 @@
 
     <span class="k">for</span> <span class="n">tokens</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">.</span><span class="nf">imap</span><span class="p">(</span><span class="n">tokenize</span><span class="p">,</span> <span class="n">fw</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">16</span><span class="p">):</span>
 
-		    <span class="c1"># if there is enough space in the current shard
+        <span class="c1"># if there is enough space in the current shard
 </span>        <span class="k">if</span> <span class="n">token_count</span> <span class="o">+</span> <span class="nf">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">shard_size</span><span class="p">:</span>
             <span class="c1"># append tokens to current shard
 </span>            <span class="n">all_tokens_np</span><span class="p">[</span><span class="n">token_count</span> <span class="p">:</span> <span class="n">token_count</span> <span class="o">+</span> <span class="nf">len</span><span class="p">(</span><span class="n">tokens</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tokens</span>
@@ -168,13 +168,13 @@
 
   <span class="k">def</span> <span class="nf">upload_many_blobs_with_transfer_manager</span><span class="p">(</span><span class="n">split</span><span class="p">,</span> <span class="n">filenames</span><span class="p">,</span> <span class="n">source_directory</span><span class="o">=</span><span class="sh">""</span><span class="p">,</span> <span class="n">workers</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
 
-	  <span class="c1"># split gives access to folders within GCP, ie "test/"
+    <span class="c1"># split gives access to folders within GCP, ie "test/"
 </span>    <span class="n">blob_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">split</span> <span class="o">+</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">]</span>
 
-	  <span class="c1"># matches blob_name splits with their respective files in local memory
+    <span class="c1"># matches blob_name splits with their respective files in local memory
 </span>    <span class="n">blob_file_pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="nf">join</span><span class="p">(</span><span class="n">source_directory</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">bucket</span><span class="p">.</span><span class="nf">blob</span><span class="p">(</span><span class="n">b</span><span class="p">))</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="nf">zip</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span> <span class="n">blob_names</span><span class="p">)]</span>
 
-	  <span class="c1"># uploading the blob_file_pairs onto GCP, utilizes threading
+    <span class="c1"># uploading the blob_file_pairs onto GCP, utilizes threading
 </span>    <span class="n">results</span> <span class="o">=</span> <span class="n">transfer_manager</span><span class="p">.</span><span class="nf">upload_many</span><span class="p">(</span>
       <span class="n">blob_file_pairs</span><span class="p">,</span> <span class="n">skip_if_exists</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">max_workers</span><span class="o">=</span><span class="n">workers</span><span class="p">,</span> <span class="n">worker_type</span><span class="o">=</span><span class="n">transfer_manager</span><span class="p">.</span><span class="n">THREAD</span>
     <span class="p">)</span>
