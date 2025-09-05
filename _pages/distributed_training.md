@@ -143,10 +143,10 @@ We can now initialize and log our mesh.
 def main(cfg: config):
   ... 
   axes = (*cfg.device_config.n_device_axis,)
-    axes_name = ("dp", "pp", "tp")
+  axes_name = ("dp", "pp", "tp")
 
-    mesh = init_devices(axes, axes_name)
-    log(mesh)
+  mesh = init_devices(axes, axes_name)
+  log(mesh)
 ```
 
 ### Checkpointing and State Management
@@ -191,11 +191,11 @@ We can now use these params to initialize our optimizer. Since the params are sh
 
 ```python
 lr_scheduler = optax.warmup_cosine_decay_schedule(
-        init_value=cfg.lr.min_lr,
-        peak_value=cfg.lr.max_lr,
-        warmup_steps=cfg.lr.warmup_steps,
-        decay_steps=cfg.lr.end_steps,
-        end_value=cfg.lr.end_lr,
+  init_value=cfg.lr.min_lr,
+  peak_value=cfg.lr.max_lr,
+  warmup_steps=cfg.lr.warmup_steps,
+  decay_steps=cfg.lr.end_steps,
+  end_value=cfg.lr.end_lr,
 )
 
 tx = optax.chain(
