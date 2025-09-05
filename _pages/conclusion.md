@@ -1,8 +1,8 @@
 ---
 layout: distill
-title: "Conclusion"
+title: "Conclusion: Summary and Future Extensions"
 permalink: /conclusion/
-description: "Description goes here. see deepmind for reference"
+description: ""
 date: 2025-09-05
 future: true
 htmlwidgets: true
@@ -32,13 +32,13 @@ authors:
 #   - make sure that TOC names matcAh the actual section names
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
-toc:
-  - name: Where Does the Time Go?
-  - subsections:
-      - name: "Visualizing rooflines"
-      - name: "Matrix multiplication"
-      - name: "Network communication rooflines"
-  - name: A Few Problems to Work
+# toc:
+#   - name: Where Does the Time Go?
+#   - subsections:
+#       - name: "Visualizing rooflines"
+#       - name: "Matrix multiplication"
+#       - name: "Network communication rooflines"
+#   - name: A Few Problems to Work
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -60,4 +60,35 @@ _styles: >
   }
 ---
 
-Main content goes here. to change: TOC, Gisucus.
+## Conclusion  
+
+Throughout this guide, we walked step-by-step through building a modern, scalable transformer model in JAX, focusing on both architectural advances and scaling practices.
+
+### Article Summaries
+
+- Part 1: Tokenization — Efficient large-scale tokenization pipelines with sharding, checkpointing, and distributed uploads.  
+- Part 2: Base Model — Implementation of a single-GPU transformer with modern modules (RMSNorm, RoPE, MLA, KV-cache).  
+- Part 3: Sharded Model — A deep dive into 3-D parallelism (data, pipeline, and tensor) with practical JAX code.  
+- Part 4: Dataset & Config — Preparing datasets, configs, and orchestration for large-scale training.  
+- Part 5: Distributed Training - Scaling across nodes with Cloud TPU clusters.
+- Part 6: Mixture of Experts - Implementing MoE layers (DeepSeek-style) with load balancing, stability tricks, and parallelism
+
+Together, these parts form a **zero-to-one guide** on how to scale transformers from a simple baseline to cutting-edge distributed training.  
+
+### Future Directions  
+
+In the future, this can be extended further by using more novel methods such as replacing GPipe with DualPipe and incorporating higher dimensions of parallelism such as expert, and/or sequence.
+
+### Authors & Contact  
+
+We are all currently 1st and 2nd year undergraduate students at the University of Waterloo studying Computer Science. Feel free to reach out with any questions!
+
+| Author           | Twitter / X                                                   | LinkedIn |
+|------------------|---------------------------------------------------------------|-------------------|
+| **Aditya Makkar** | [@AdityaMakkar000](https://x.com/AdityaMakkar000)             | [Aditya Makkar](https://www.linkedin.com/in/aditya-makkar-76a23a246/) |
+| **Divya Makkar**  | [@_DivyaMakkar](https://x.com/_DivyaMakkar)                   | [Divya Makkar](https://www.linkedin.com/in/divya-makkar000/) |
+| **Chinmay Jindal**| [@chinmayjindal_](https://x.com/chinmayjindal_)               | [Chinmay Jindal](https://www.linkedin.com/in/chinmayjindal/) |
+
+### More Links
+
+- ⭐ GitHub Repository: [Jaxformer](https://github.com/divyamakkar0/Jaxformer)  
