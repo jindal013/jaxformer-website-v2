@@ -32,8 +32,12 @@ authors:
 #   - make sure that TOC names matcAh the actual section names
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
-# toc:
-#   - name: Where Does the Time Go?
+toc:
+  - name: Conclusion
+  - name: Article Summaries
+  - name: Future Directions
+  - name: Authors & Contact
+  - name: Links
 #   - subsections:
 #       - name: "Visualizing rooflines"
 #       - name: "Matrix multiplication"
@@ -73,15 +77,17 @@ Throughout this guide, we walked step-by-step through building a modern, scalabl
 - Part 5: Distributed Training - Scaling across nodes with Cloud TPU clusters.
 - Part 6: Mixture of Experts - Implementing MoE layers (DeepSeek-style) with load balancing, stability tricks, and parallelism
 
-Together, these parts form a **zero-to-one guide** on how to scale transformers from a simple baseline to cutting-edge distributed training.  
+Together, these parts form a zero-to-one guide on how to scale transformers from a simple baseline to cutting-edge distributed training.  
 
 ### Future Directions  
 
-In the future, this can be extended further by using more novel methods such as replacing GPipe with DualPipe and incorporating higher dimensions of parallelism such as expert, and/or sequence.
+In the future, this can be extended further by using more novel methods such as replacing GPipe with DualPipe and incorporating higher dimensions of parallelism such as expert, and/or sequence. We can also extend the tokenziation process by streaming Parquet files over a distributed network.
 
-### Authors & Contact  
+***How to get in touch:** leave a comment on any page, reach us on socials, or start a discussion thread on the Github repo.
 
-We are all currently 1st and 2nd year undergraduate students at the University of Waterloo studying Computer Science. Feel free to reach out with any questions!
+### Authors & Contact
+
+We are all currently 1st and 2nd year undergraduate students at the University of Waterloo studying Computer Science.
 
 | Author           | Twitter / X                                                   | LinkedIn |
 |------------------|---------------------------------------------------------------|-------------------|
@@ -89,6 +95,7 @@ We are all currently 1st and 2nd year undergraduate students at the University o
 | **Divya Makkar**  | [@_DivyaMakkar](https://x.com/_DivyaMakkar)                   | [Divya Makkar](https://www.linkedin.com/in/divya-makkar000/) |
 | **Chinmay Jindal**| [@chinmayjindal_](https://x.com/chinmayjindal_)               | [Chinmay Jindal](https://www.linkedin.com/in/chinmayjindal/) |
 
-### More Links
+### Links
 
-- ⭐ GitHub Repository: [JAXformer](https://github.com/divyamakkar0/Jaxformer)  
+- ⭐ GitHub Repository (model): [JAXformer](https://github.com/divyamakkar0/Jaxformer)
+- ⭐ Website Repository: [Jaxformer Website](https://jindal013.github.io/jaxformer-website-v2)
