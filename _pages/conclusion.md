@@ -91,4 +91,4 @@ We are all currently 1st and 2nd year undergraduate students at the University o
 
 ### More Links
 
-- ⭐ GitHub Repository: [Jaxformer](https://github.com/divyamakkar0/Jaxformer)  
+- ⭐ GitHub Repository: [JAXformer](https://github.com/divyamakkar0/Jaxformer)  

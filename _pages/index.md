@@ -89,3 +89,5 @@ Prior to reading this guide, we assume you are famiilar with the following topic
 - Basic familiarity with distributed training ideas
 - JAX basics. Read through their [docs](https://docs.jax.dev/en/latest/)
 - Andrej Karpathy's [Zero-to-Hero Neural Network](https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ) series
+
+Find the complete code at the GitHub repository: [JAXformer](https://github.com/divyamakkar0/Jaxformer). 
