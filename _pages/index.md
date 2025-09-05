@@ -3,7 +3,7 @@ layout: distill
 title: "Jaxformer"
 subtitle: "Scaling Modern Transformers"
 permalink: /
-description: "This is a zero-to-one guide on scaling modern transformers with n-dimensional parallelism. Transformers have driven much of the deep learning revolution, yet no practical guide reflects SOTA architectures and the complexities of large-scale language modelling. While excellent resources such as DeepMind’s 'How to Scale Your Model' and HuggingFace’s 'Ultra Scale Playbook' exist, a gap remains between theory and end-to-end implementation. We aim to bridge that gap by showing you how to scale a model from scratch (in Jax, with code!) to current standards."
+description: "This is a zero-to-one guide on scaling modern transformers with n-dimensional parallelism. Transformers have driven much of the deep learning revolution, yet no practical guide reflects SOTA architectures and the complexities of large-scale language modelling. While excellent resources such as DeepMind’s 'How to Scale Your Model' and HuggingFace’s 'Ultra Scale Playbook' exist, a gap remains between theory and end-to-end implementation. We aim to bridge that gap by showing you how to scale a model from scratch (in Jax, with code) to current standards."
 date: 2025-09-05
 future: true
 htmlwidgets: true
@@ -81,6 +81,8 @@ _styles: >
   });
 </script>
 
+Find the complete code at the GitHub repository: [JAXformer](https://github.com/divyamakkar0/Jaxformer).
+
 ## Prerequisites
 
 Prior to reading this guide, we assume you are famiilar with the following topics and resources (or equivalent material):
@@ -89,5 +91,3 @@ Prior to reading this guide, we assume you are famiilar with the following topic
 - Basic familiarity with distributed training ideas
 - JAX basics. Read through their [docs](https://docs.jax.dev/en/latest/)
 - Andrej Karpathy's [Zero-to-Hero Neural Network](https://www.youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ) series
-
-Find the complete code at the GitHub repository: [JAXformer](https://github.com/divyamakkar0/Jaxformer). 

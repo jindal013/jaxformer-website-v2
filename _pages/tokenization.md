@@ -82,7 +82,7 @@ Tokenization is the process of breaking text (in our case, UTF-8 encoding) into 
 
 ### Libraries, Tokenizer & Dataset
 
-The tokenizer is pre-trained and loaded through OpenAI's [tiktoken](https://github.com/openai/tiktoken) library. Tiktoken is a fast BPE tokenizer that is used with OpenAI's models. We use the GPT-4 tokenizer, `cl100k_base`, as that is has the vocab size of a modern transformer. It has a vocab size of `100,277` and thus, the data type of the internal memory representation we use is `uint32`. The tokenize function grabs the `"text"` value of each dataset row and converts it into a `numpy` array. The `doc_id` is returned for checkpointing purposes, which will be explained in more detail below.
+The tokenizer is pre-trained and loaded through OpenAI's [tiktoken](https://github.com/openai/tiktoken) library. Tiktoken is a fast BPE tokenizer that is used with OpenAI's models. We use the GPT-4 tokenizer (`cl100k_base`) with a vocab size of `100,277` and thus the `uint32` data type is used. The tokenize function grabs the `"text"` value of each dataset row and converts it into a `numpy` array. The `doc_id` is returned for checkpointing purposes, which will be explained in more detail below.
 
 ```python
 enc = tiktoken.encoding_for_model("gpt-4") # 'cl100k_base'
@@ -146,7 +146,7 @@ for tokens, doc_id in pool.imap(tokenize, fw, chunksize=16):
 ...
 ```
 
-Another design decision was to stream the Hugging Face (HF) dataset. Streaming a HF dataset means processing and iterating over it without first downloading it locally. Instead of downloading the entire dataset to disk, data is loaded progressively as you iterate through it. This is ideal for our use case as we can start tokenizing shards right away.
+Another design decision was to stream the Hugging Face (HF) dataset. Streaming a HF dataset means progressively loading and processing data as you iterate, without downloading the entire dataset to disk. This is ideal for our use case as we can start tokenizing shards right away.
 
 ```python
 fw = load_dataset("HuggingFaceFW/fineweb-edu", name=remote_name, split="train", streaming=True)
@@ -158,7 +158,7 @@ A single VM can support multiprocessing as it has multiple CPU cores. We can uti
 
 ### Core concepts
 
-Tokenization is a CPU-bound task, which makes Python’s normal threading ineffective because of the [Global Interpreter Lock (GIL)](https://en.wikipedia.org/wiki/Global_interpreter_lock). GIL makes it so that only one thread can execute Python bytecode at a time. For I/O tasks or API requests, threading is fine, but for heavy computation it gives almost no speedup as it provides concurrency and not true parallelism.
+Tokenization is a CPU-bound task, which makes Python’s normal threading ineffective because of the [Global Interpreter Lock (GIL)](https://en.wikipedia.org/wiki/Global_interpreter_lock).<d-footnote>Note: Starting in Python 3.13, this limitation has been lifted via an experimental free-threaded build that disables the GIL.</d-footnote> GIL makes it so that only one thread can execute Python bytecode at a time. For I/O tasks or API requests, threading is fine, but for heavy computation it gives almost no speedup as it provides concurrency and not true parallelism.
 
 {% include figure.liquid path="assets/img/tokenization/2.png" class="img-fluid" caption="Multiprocessing uses separate processes whereas threading handles concurrency (<a href='https://datanoon.com/blog/multiprocessing_in_python/'>source</a>)" %}
 
@@ -623,4 +623,4 @@ if os.path.exists(DATA_CACHE_DIR):
   shutil.rmtree(DATA_CACHE_DIR)
 ```
 
-Now that we are done with tokenization, we can move onto model architecture, starting with learning how to write the base model!
+Now that we are done with tokenization, we can move onto model architecture, starting with learning how to write the base model.

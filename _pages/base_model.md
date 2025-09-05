@@ -2,7 +2,7 @@
 layout: distill
 title: "How to Write the Base Model"
 permalink: /base_model/
-description: "We begin by writing the single-GPU base model including modern day modules such as RMSNorm, Multi-latent Attention, RoPE, decoupled RoPE embeddings, interleaved attention, KV-cache and more. This serves as a working foundation, from which we can later scale to multi-GPU and distributed training setups."
+description: "We begin by writing the single-TPU base model including modern day modules such as RMSNorm, Multi-latent Attention, RoPE, decoupled RoPE embeddings, interleaved attention, KV-cache and more. This serves as a working foundation, from which we can later scale to multi-TPU and distributed training setups."
 date: 2025-09-05
 future: true
 htmlwidgets: true
@@ -84,15 +84,21 @@ class RMSNorm(nn.Module):
         x = x / jnp.sqrt(rms + 1e-6)
 
     gamma = self.param(
-            "gamma", nn.initializers.ones, (1, 1, x.shape[-1]), self.model_dtype
-        )
-        beta = self.param(
-            "beta", nn.initializers.zeros, (1, 1, x.shape[-1]), self.model_dtype
-        )
+      "gamma", 
+      nn.initializers.ones, 
+      (1, 1, x.shape[-1]), 
+      self.model_dtype
+      )
+    beta = self.param(
+      "beta", 
+      nn.initializers.zeros, 
+      (1, 1, x.shape[-1]), 
+      self.model_dtype
+      )
+    
+    x = x * gamma + beta
 
-        x = x * gamma + beta
-
-        return x
+    return x
 ```
 
 ## Embedding
@@ -122,7 +128,6 @@ def __call__(self, x: Array, out: bool = False) -> Array:
       # perform embedding loop
   else:
     # perform dot-product with transpose of the embedding params
-    A
     return x
 ```
 
