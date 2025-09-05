@@ -136,7 +136,7 @@ TEST_SPLIT = 350 # 0 (inclusive) to 350 (exclusive) shards are test
 for tokens, doc_id in pool.imap(tokenize, fw, chunksize=16):
     ...
 
-	if shard_index >= 0 and shard_index < TEST_SPLIT:
+  if shard_index >= 0 and shard_index < TEST_SPLIT:
         split = 'test/'
         shard_index_number = shard_index
     else:
@@ -191,7 +191,7 @@ with mp.Pool(nprocs) as pool:
 
     for tokens in pool.imap(tokenize, fw, chunksize=16):
 
-		    # if there is enough space in the current shard
+        # if there is enough space in the current shard
         if token_count + len(tokens) < shard_size:
             # append tokens to current shard
             all_tokens_np[token_count : token_count + len(tokens)] = tokens
@@ -260,13 +260,13 @@ def upload_file(split):
 
   def upload_many_blobs_with_transfer_manager(split, filenames, source_directory="", workers=8):
 
-	  # split gives access to folders within GCP, ie "test/"
+    # split gives access to folders within GCP, ie "test/"
     blob_names = [split + name for name in filenames]
 
-	  # matches blob_name splits with their respective files in local memory
+    # matches blob_name splits with their respective files in local memory
     blob_file_pairs = [(os.path.join(source_directory, f), bucket.blob(b)) for f, b in zip(filenames, blob_names)]
 
-	  # uploading the blob_file_pairs onto GCP, utilizes threading
+    # uploading the blob_file_pairs onto GCP, utilizes threading
     results = transfer_manager.upload_many(
       blob_file_pairs, skip_if_exists=True, max_workers=workers, worker_type=transfer_manager.THREAD
     )

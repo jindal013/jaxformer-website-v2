@@ -83,7 +83,7 @@ class RMSNorm(nn.Module):
         rms = jnp.mean(jnp.square(x), axis=-1, keepdims=True)
         x = x / jnp.sqrt(rms + 1e-6)
 
-		gamma = self.param(
+    gamma = self.param(
             "gamma", nn.initializers.ones, (1, 1, x.shape[-1]), self.model_dtype
         )
         beta = self.param(
@@ -172,11 +172,11 @@ class Embeddings(nn.Module):
 
     def __call__(self, x: Array, out: bool = False) -> Array:
         if not out:
-		    x = self.embedding(x)
-			if self.is_mutable_collection("params"):
+        x = self.embedding(x)
+      if self.is_mutable_collection("params"):
                 _ = self.norm(x)
-	    else:
-			x = self.norm(x)
+      else:
+      x = self.norm(x)
             x = self.embedding.attend(x)
         return x
 ```
@@ -192,7 +192,7 @@ class Dense(nn.Module):
 
     @nn.compact
     def __call__(self, x: Array):
-	    x = nn.Dense(features=self.features, dtype=self.dtype)(x)
+      x = nn.Dense(features=self.features, dtype=self.dtype)(x)
         return x
 ```
 
@@ -224,7 +224,7 @@ Note that since JAX is functional, for features such as `Dropout`, we pass param
 
 ## RoPE
 
-Rotary Positional Embeddings allow for relative embeddings based on applying standard euclidean 2D-rotation to each $2$ dimensional subspaces of the $n$ dimensional vector. We can represent this as 
+Rotary Positional Embeddings allow for relative embeddings based on applying standard euclidean 2D-rotation to each $2$ dimensional subspaces of the $n$ dimensional vector. We can represent this as
 
 $$
 \mathbf{x}_{\text{RoPE}}(m) =
@@ -247,7 +247,7 @@ x_d
 \end{bmatrix}
 $$
 
-where $m$ is the time position and  each $\left( 2 \times 2 \right)$  $R(m)$ block is
+where $m$ is the time position and each $\left( 2 \times 2 \right)$ $R(m)$ block is
 
 $$
 R(m\theta_k) =
@@ -273,7 +273,7 @@ $$
 
 Intuitively, this is just a 2D-rotation by different angles at each time step, applied within each subspace to provide every possible time step with a distinct relative positional encoding.
 
-The rotation matrix is used in the forward pass; however, instead of doing a matrix multiplication which would be $O(d^2T)$, we can perform a product-wise multiplication taking advantage of the  of the sparsity of the matrix and achieve $O(dT)$. Hence for any time step and position, we only perform 2 multiplications which can be written as an element-wise operation instead.
+The rotation matrix is used in the forward pass; however, instead of doing a matrix multiplication which would be $O(d^2T)$, we can perform a product-wise multiplication taking advantage of the of the sparsity of the matrix and achieve $O(dT)$. Hence for any time step and position, we only perform 2 multiplications which can be written as an element-wise operation instead.
 
 $$
 \begin{equation}
@@ -334,7 +334,7 @@ class RoPE(nn.Module):
         assert self.model_dim % 2 == 0, "model_dim must be even"
 ```
 
- Then, we create a frequency array `[1,2,3,...,T]` which will scale our $\theta$. To make this a`2D` array, we expand the dim to create `[[1], [2], [3], ..., [T]]`, since this will allow for broadcasting with the channel frequencies and make it one indexed.
+Then, we create a frequency array `[1,2,3,...,T]` which will scale our $\theta$. To make this a`2D` array, we expand the dim to create `[[1], [2], [3], ..., [T]]`, since this will allow for broadcasting with the channel frequencies and make it one indexed.
 
 ```python
 freq = jnp.arange(self.T, dtype=jnp.float32)[:, None] + 1
@@ -356,7 +356,7 @@ log_theta_base = jnp.log(10000.0)
 theta = jnp.exp(-2 * pos / self.model_dim * log_theta_base)
 ```
 
-Finally, we create the final array of $\cos$  and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be $[[1 \theta_0, 1\theta_0 1\theta_1, \theta_1, \ldots, 1 \theta_{d/2} 1 \theta_{d/2}], \ldots, [T \theta_0, T \theta_0, \ldots, T \theta_{d/2}, T \theta_{d/2}]]$.
+Finally, we create the final array of $\cos$ and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be $[[1 \theta_0, 1\theta_0 1\theta_1, \theta_1, \ldots, 1 \theta_{d/2} 1 \theta_{d/2}], \ldots, [T \theta_0, T \theta_0, \ldots, T \theta_{d/2}, T \theta_{d/2}]]$.
 
 ```python
 class RoPE(nn.Module):
@@ -452,7 +452,7 @@ class RoPE(nn.Module):
 
 ## Multi-Latent Attention
 
-We now write the core attention mechanism of the model. We will use multi-latent attention introduced in [DeepSeek-V2](https://arxiv.org/pdf/2405.04434). The driving idea is motivated by how to save inference-time memory. In a standard KV-cache, our transformer has to save $2LTd$ elements as for each key/value pair in a layer, we have $T$ time steps for which the dimension is $d$. Now, consider a transformer with a sequence length of $T = 128k$, dimension of $d = 7168$ and layers $L = 61$. If the KV cache is stored in `bfloat16` this leads to $\frac{2 \cdot 61 \cdot 128 \cdot 10^3 \cdot 7168 \cdot 2}{10^9} \approx 220GB$  of memory constraints. There exists solutions to optimize this such as Grouped Query Attention or Multi Query Attention (when $n_{\text{groups}}$ equals 1); however, these often lead to a decrease in quality. Multi latent attention attempts to fix this using the idea of [Low-Rank decomposition](https://en.wikipedia.org/wiki/Low-rank_approximation) . Instead of using $K = W^k x$ and $V = W^v x$. we decompose the $W^k$ and $W^v$ into a matrix-matrix product $W^K = AB$ where $A \in \mathbb{R}^{d \times r}$ and $B \in \mathbb{R}^{r \times d}$  where $r << d$. This way we use $2dr$ space instead of $2d^2$ and thus grow linearly with $d$ instead of quadratically. In terms of the cache, we now store $Bx$ instead of $W^Kx = ABx$. This means our memory is now $2LTr$, which in terms of the previous example, is roughly $33$ GB.
+We now write the core attention mechanism of the model. We will use multi-latent attention introduced in [DeepSeek-V2](https://arxiv.org/pdf/2405.04434). The driving idea is motivated by how to save inference-time memory. In a standard KV-cache, our transformer has to save $2LTd$ elements as for each key/value pair in a layer, we have $T$ time steps for which the dimension is $d$. Now, consider a transformer with a sequence length of $T = 128k$, dimension of $d = 7168$ and layers $L = 61$. If the KV cache is stored in `bfloat16` this leads to $\frac{2 \cdot 61 \cdot 128 \cdot 10^3 \cdot 7168 \cdot 2}{10^9} \approx 220GB$ of memory constraints. There exists solutions to optimize this such as Grouped Query Attention or Multi Query Attention (when $n_{\text{groups}}$ equals 1); however, these often lead to a decrease in quality. Multi latent attention attempts to fix this using the idea of [Low-Rank decomposition](https://en.wikipedia.org/wiki/Low-rank_approximation) . Instead of using $K = W^k x$ and $V = W^v x$. we decompose the $W^k$ and $W^v$ into a matrix-matrix product $W^K = AB$ where $A \in \mathbb{R}^{d \times r}$ and $B \in \mathbb{R}^{r \times d}$ where $r << d$. This way we use $2dr$ space instead of $2d^2$ and thus grow linearly with $d$ instead of quadratically. In terms of the cache, we now store $Bx$ instead of $W^Kx = ABx$. This means our memory is now $2LTr$, which in terms of the previous example, is roughly $33$ GB.
 
 To further save memory, we can use the same $B$ matrix for the key and values, thus $W^K = A^KB$ and $W^V = A^V B$. This means we can get rid of the 2 factor, further cutting our memory in half to $\approx 16$GB. Note this does trade memory for compute; however, in these cases, we are memory bound which appeals to the idea of MLA.
 
@@ -476,15 +476,15 @@ For our call method, we take in the array as well as the caches.
 ```python
 @nn.compact
 def __call__(
-	self,
-	x: Array,
-	*,
-	cKV_cache: Optional[Array] = None,
-	kRT_cache: Optional[Array] = None,
-	train=True,
+  self,
+  x: Array,
+  *,
+  cKV_cache: Optional[Array] = None,
+  kRT_cache: Optional[Array] = None,
+  train=True,
 ) -> Tuple[Array, Tuple[Optional[Array], Optional[Array]]]:
 
-	B, T, C = x.shape # get dimension information
+  B, T, C = x.shape # get dimension information
 ```
 
 Note we will return a tuple with the result of the attention and another tuple which will hold the caches for the Key-value pair and the RoPE (to be discussed later on).
@@ -496,7 +496,7 @@ x = Dense(features=2 * self.latent_dim, dtype=self.model_dtype)(x)
 kv_latent, q_latent = jnp.split(x, 2, axis=-1)
 ```
 
-Note that we only create one `Dense` for this operation since we can split the output along the last dim due to obtaining $x \in \mathbb{R}^{ B \times T \times 2 \cdot r}$  which is equivalent to doing the following:
+Note that we only create one `Dense` for this operation since we can split the output along the last dim due to obtaining $x \in \mathbb{R}^{ B \times T \times 2 \cdot r}$ which is equivalent to doing the following:
 
 ```python
 kv_latent = Dense(features=self.latent_dim, dtype=self.model_dtype)(x)
@@ -507,9 +507,9 @@ We can then write the up-projection from the latent space to the final key, valu
 
 ```python
 k, v = jnp.split(
-	Dense(features=2 * self.model_dimension, dtype=self.model_dtype)(kv_latent),
-	2,
-	axis=-1,
+  Dense(features=2 * self.model_dimension, dtype=self.model_dtype)(kv_latent),
+  2,
+  axis=-1,
 )
 q = Dense(features=self.model_dimension, dtype=self.model_dtype)(q_latent)
 ```
@@ -518,28 +518,28 @@ Then, we can map over the tuple `(q, k ,v)` to split them into `n_head` batches.
 
 ```python
 q, k, v = jax.tree.map(
-	lambda x: rearrange(x, "B T (nh d) -> B nh T d", nh=self.n_heads), (q, k, v)
+  lambda x: rearrange(x, "B T (nh d) -> B nh T d", nh=self.n_heads), (q, k, v)
 )
 ```
 
-We make use of the `rearrange` op from the `einops` library  for ease of reading the operation, as opposed to writing `x.reshape(...).permute(...)`. In this case, we split the last dim into `n_head` arrays and then permute it to ensure the last 2 dims will be multiplied like in MHA. We can use the `tree.map` function to map over the the tuple.
+We make use of the `rearrange` op from the `einops` library for ease of reading the operation, as opposed to writing `x.reshape(...).permute(...)`. In this case, we split the last dim into `n_head` arrays and then permute it to ensure the last 2 dims will be multiplied like in MHA. We can use the `tree.map` function to map over the the tuple.
 
 We can now write a function to perform the normal scaled-dot product attention.
 
 ```python
 def scaledDotProd(q, k, v, mask):
-	input_dtype = q.dtype
+  input_dtype = q.dtype
 
-	q, k ,v = jax.tree.map(lambda x: x.astype(jnp.float32), (q, k, v))
-	dk = q.shape[-1]
+  q, k ,v = jax.tree.map(lambda x: x.astype(jnp.float32), (q, k, v))
+  dk = q.shape[-1]
 
-	w = jnp.einsum("B n T d, B n t d -> B n T t", q, k) * (dk**-0.5)
-	w = jnp.where(mask == 0, -jnp.inf, w)
-	w = jax.nn.softmax(w, axis=-1)
-	output = jnp.einsum("B n T t, B n t d -> B n T d", w, v)
+  w = jnp.einsum("B n T d, B n t d -> B n T t", q, k) * (dk**-0.5)
+  w = jnp.where(mask == 0, -jnp.inf, w)
+  w = jax.nn.softmax(w, axis=-1)
+  output = jnp.einsum("B n T t, B n t d -> B n T d", w, v)
 
-	output = output.astype(input_dtype)
-	return output
+  output = output.astype(input_dtype)
+  return output
 ```
 
 Breaking this function down, the input `dtype` is recorded to ensure that after performing the attention computation in `jnp.float32`, it can be casted back to the right precision afterwards. We then covert our `q,k,v` to `jnp.float32`. The attention operation can be expressed using [einsum notation](https://rockt.ai/2018/04/30/einsum) and casted back to the original type.
@@ -548,7 +548,7 @@ We can then create the mask, call the function.
 
 ```python
 mask = jnp.tril(
-	jnp.ones((B, self.n_heads, q.shape[2], k.shape[2])),
+  jnp.ones((B, self.n_heads, q.shape[2], k.shape[2])),
 )
 
 output = scaledDotProd(q, k, v, mask)
@@ -568,46 +568,46 @@ MLA also uses the idea of decoupled RoPE appending on the positional encoding to
 use_rope = self.dhR > 0
 
 if use_rope:
-	t_start = 0 # needed for KV Cache
-	x_k_r = Dense(features=self.dhR, dtype=self.model_dtype)(x)
-	x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
+  t_start = 0 # needed for KV Cache
+  x_k_r = Dense(features=self.dhR, dtype=self.model_dtype)(x)
+  x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
 ```
 
 Following the Deepseek V-3 paper, each query head will get a unique set of decoupled RoPE encodings but the key heads will all share one set (repeated across each head). Now, we can setup a RoPE module and apply them onto both latents. For the queries RoPE, we can rearrange them to split each head into it's own batch.
 
 ```python
 if use_rope:
-	t_start = 0 # needed for KV Cache
-	x_k_r = Dense(features=self.dhR, dtype=self.model_dtype)(x)
-	x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
+  t_start = 0 # needed for KV Cache
+  x_k_r = Dense(features=self.dhR, dtype=self.model_dtype)(x)
+  x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
 
-	rope_k = RoPE(
-		model_dim=self.dhR, T=self.T
-	)
-	rope_q = RoPE(
-		model_dim=self.dhR * self.n_heads,
-		T=self.T,
-	)
+  rope_k = RoPE(
+    model_dim=self.dhR, T=self.T
+  )
+  rope_q = RoPE(
+    model_dim=self.dhR * self.n_heads,
+    T=self.T,
+  )
 
-	kRt = rope_k(x_k_r, t_start)
+  kRt = rope_k(x_k_r, t_start)
 
-	qRt = rope_q(x_q_r, t_start)
-	qRt = rearrange(qRt, "B T (nh d) -> B nh T d", nh=self.n_heads)
+  qRt = rope_q(x_q_r, t_start)
+  qRt = rearrange(qRt, "B T (nh d) -> B nh T d", nh=self.n_heads)
 ```
 
 After constructing the key, query, and value tensors, if we are using RoPE, we can concatenate them while repeating the decoupled key embeddings across all heads.
 
 ```python
 q, k, v = jax.tree.map(
-	lambda x: rearrange(x, "B T (nh d) -> B nh T d", nh=self.n_heads),
-	(q, k, v)
+  lambda x: rearrange(x, "B T (nh d) -> B nh T d", nh=self.n_heads),
+  (q, k, v)
 )
 
 if use_rope:
-	q = jnp.concatenate([q, qRt], axis=-1)
+  q = jnp.concatenate([q, qRt], axis=-1)
 
-	kRt = jnp.repeat(kRt[:, None, :, :], self.n_heads, axis=1) # add dim for head
-	k = jnp.concatenate([k, kRt], axis=-1)
+  kRt = jnp.repeat(kRt[:, None, :, :], self.n_heads, axis=1) # add dim for head
+  k = jnp.concatenate([k, kRt], axis=-1)
 ```
 
 The last step is to setup the caching. The first change is in the RoPE block to find` t_start` since if we are using cached indices, we need to know which position to begin applying the RoPE from. To do this, we take the length of the cache as it represents our current index which we need to start from as tensor-indexing is 0-indexed.
@@ -618,7 +618,7 @@ Thus our first line in the if statement of the rope block becomes:
 t_start = KV_cache.shape[1] if KV_cache is not None else 0
 ```
 
-Note we can use either `KV_cache.shape[1]` or  `KR_cache.shape[1]`.
+Note we can use either `KV_cache.shape[1]` or `KR_cache.shape[1]`.
 
 Then we can build the cache if we are not training.
 
@@ -634,35 +634,35 @@ x = Dense(features=2 * self.latent_dim, dtype=self.model_dtype)(x)
 kv_latent, q_latent = jnp.split(x, 2, axis=-1)
 ...
 if not train:
-	if KV_cache is not None:
-		kv_latent = jnp.concatenate([KV_cache, kv_latent], axis=1)
-	KV_cache = kv_latent
+  if KV_cache is not None:
+    kv_latent = jnp.concatenate([KV_cache, kv_latent], axis=1)
+  KV_cache = kv_latent
 ```
 
 The same approach can work with the `RoPE` keys.
 
 ```python
 if not train:
-	if KV_cache is not None:
-		kv_latent = jnp.concatenate([KV_cache, kv_latent], axis=1)
-	KV_cache = kv_latent
+  if KV_cache is not None:
+    kv_latent = jnp.concatenate([KV_cache, kv_latent], axis=1)
+  KV_cache = kv_latent
 
-	if use_rope:
-		if KR_cache is not None:
-			kRt = jnp.concatenate([KR_cache, kRt], axis=1)
-		KR_cache = kRt
+  if use_rope:
+    if KR_cache is not None:
+      kRt = jnp.concatenate([KR_cache, kRt], axis=1)
+    KR_cache = kRt
 ```
 
 The last change required is in the masking since if we have a length of 1, we don't want to mask out any element since that query pair can attend to every past one.
 
 ```python
 if T == 1:
-	# q.shape[2] is 1 as well but we are more explict
-	mask = jnp.ones((B, local_n_heads, 1, k.shape[2])) l
+  # q.shape[2] is 1 as well but we are more explict
+  mask = jnp.ones((B, local_n_heads, 1, k.shape[2])) l
 else:
-	mask = jnp.tril(
-		jnp.ones((B, local_n_heads, q.shape[2], k.shape[2])),
-	)
+  mask = jnp.tril(
+    jnp.ones((B, local_n_heads, q.shape[2], k.shape[2])),
+  )
 ```
 
 At the ending we return following the signature of the function
@@ -708,7 +708,7 @@ class MLA(nn.Module):
         if use_rope:
             t_start = KV_cache.shape[1] if KV_cache is not None else 0
             x_k_r = Dense(features=self.dhR, dtype=self.model_dtype)(x)
-			x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
+      x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
 
             rope_k = RoPE(
                 model_dim=self.dhR, T=self.T
@@ -797,7 +797,7 @@ class MLA(nn.Module):
 
 ## Interleaved Attention Layers
 
-Interleaved attention layers was introduced in [Cohere's Command A model](https://cohere.com/research/papers/command-a-technical-report.pdf). There they use sliding window attention with positional embeddings (RoPE) and a full attention with no positional embeddings. Here we use MLA attention for all layers in the block with decoupled RoPE but don't apply RoPE at the ending. This is relatively simple as we take a layer-per-block and on the last one set the `dhR = 0`.  The class is shown below.
+Interleaved attention layers was introduced in [Cohere's Command A model](https://cohere.com/research/papers/command-a-technical-report.pdf). There they use sliding window attention with positional embeddings (RoPE) and a full attention with no positional embeddings. Here we use MLA attention for all layers in the block with decoupled RoPE but don't apply RoPE at the ending. This is relatively simple as we take a layer-per-block and on the last one set the `dhR = 0`. The class is shown below.
 
 We begin with the single layer which applies the pre-norm normalization, attention and feedforward network.
 
@@ -918,7 +918,7 @@ class Transformer(nn.Module):
         self, x, cache: Optional[cache_type] = None, train=True
     ) -> Tuple[Array, cache_type]:
         if cache is not None:
-			x = x[..., -1:]
+      x = x[..., -1:]
 
         *B, T = x.shape
         x = x.reshape(-1, T)
@@ -928,55 +928,55 @@ We then add our embedding module and go through the `self.blocks`. In the end we
 
 ```python
 class Transformer(nn.Module):
-	embedding = Embedding(
-		vocab_size=self.vocab_size,
-		model_dimension=self.model_dimension,
-		model_dtype=self.model_dtype,
-	)
+  embedding = Embedding(
+    vocab_size=self.vocab_size,
+    model_dimension=self.model_dimension,
+    model_dtype=self.model_dtype,
+  )
 
-	x = embedding(x)
+  x = embedding(x)
 
-	KV_cache = []
-	ckRT_cache = []
+  KV_cache = []
+  ckRT_cache = []
 
-	for i in range(self.blocks):
-		if cache is None:
-			layer_cache = None
-		else:
-			cKV = cache[0][i]
-			kRT = cache[1][i] if cache[1] is not None else None
-			layer_cache = (cKV, kRT)
+  for i in range(self.blocks):
+    if cache is None:
+      layer_cache = None
+    else:
+      cKV = cache[0][i]
+      kRT = cache[1][i] if cache[1] is not None else None
+      layer_cache = (cKV, kRT)
 
-		x, cache_out = Block(
-			layers=self.layers_per_block,
-			model_dimension=self.model_dimension,
-			n_heads=self.n_head,
-			T=self.T,
-			latent_dim=self.latent_dim,
-			dhR=self.dhR,
-			dropout_rate=self.dropout_rate,
-			model_dtype=self.model_dtype,
-		)(x, layer_cache, train=train)
+    x, cache_out = Block(
+      layers=self.layers_per_block,
+      model_dimension=self.model_dimension,
+      n_heads=self.n_head,
+      T=self.T,
+      latent_dim=self.latent_dim,
+      dhR=self.dhR,
+      dropout_rate=self.dropout_rate,
+      model_dtype=self.model_dtype,
+    )(x, layer_cache, train=train)
 
-		if cache_out[0] is not None:
-			KV_cache.append(cache_out[0])
-		if cache_out[1] is not None:
-			ckRT_cache.append(cache_out[1])
+    if cache_out[0] is not None:
+      KV_cache.append(cache_out[0])
+    if cache_out[1] is not None:
+      ckRT_cache.append(cache_out[1])
 
-	if len(KV_cache) > 0:
-		KV_cache = jnp.stack(KV_cache, axis=0)
-	else:
-		KV_cache = None
-	if len(ckRT_cache) > 0:
-		ckRT_cache = jnp.stack(ckRT_cache, axis=0)
-	else:
-		ckRT_cache = None
-	out_cache = (KV_cache, ckRT_cache)
+  if len(KV_cache) > 0:
+    KV_cache = jnp.stack(KV_cache, axis=0)
+  else:
+    KV_cache = None
+  if len(ckRT_cache) > 0:
+    ckRT_cache = jnp.stack(ckRT_cache, axis=0)
+  else:
+    ckRT_cache = None
+  out_cache = (KV_cache, ckRT_cache)
 
-	x_out = embedding(x, out=True)
-	x_out = x_out.reshape(*B, T, self.vocab_size)
+  x_out = embedding(x, out=True)
+  x_out = x_out.reshape(*B, T, self.vocab_size)
 
-	return x_out, out_cache
+  return x_out, out_cache
 ```
 
 This is not the final model we are using for training since in native JAX, it is not simple to split across `n-D` parallelism and we want to stay away from abstractions provided by Flax which operate as a blackbox over the network. To simplify construction of the transformer, we can create a data class to represent the arguments to the constructor and create a static method that will load the transformer.
@@ -1012,8 +1012,8 @@ class modelConfig:
     model_dtype: str = "bfloat16"
 
 class Transformer(nn.Module):
-	...
-	@classmethod
+  ...
+  @classmethod
     def get_model(cls, cfg: modelConfig) -> "Transformer":
         return cls(
             model_dimension=cfg.model_dimension,
