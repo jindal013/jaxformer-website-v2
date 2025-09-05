@@ -26,21 +26,10 @@
     <div class="container">
       {% if page.permalink != '/' or page.layout == 'distill' %}
         <a class="navbar-brand title font-weight-lighter" href="/">
-          {% if site.title == 'blank' %}
-            {% if site.first_name %}
-              <span class="font-weight-bold">
-                {{- site.first_name -}}
-              </span>
-            {% endif %}
-            {% if site.middle_name %}
-              {{- site.middle_name -}}
-            {% endif %}
-            {% if site.last_name %}
-              {{- site.last_name -}}
-            {% endif %}
-          {% else %}
-            {{- site.title -}}
-          {% endif %}
+          <span class="d-none d-sm-inline">{{ site.title }}</span>
+          <span class="d-inline d-sm-none">
+            {{ site["title-two"] | default: site.title }}
+          </span>
         </a>
       {% elsif site.enable_navbar_social %}
         <!-- Social Icons -->
