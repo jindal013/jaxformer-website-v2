@@ -41,7 +41,6 @@ toc:
   - name: Prerequisites
   - name: Goals
   - name: Overview
-  - name: Why This Matters
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -95,7 +94,7 @@ More information about the authors can be found on the [Conclusions page](https:
 
 Modern transformers are at the heart of today’s deep learning systems, but taking them from a single-GPU prototype to a multi-node cluster is not straightforward. Scaling efficiently requires understanding how data moves through the hardware, how models can be split across devices, and how training infrastructure ties everything together.  
 
-This guide is a practical, code-first walkthrough of scaling modern transformers in JAX. Our goal is to bridge the gap between high-level scaling theory and hands-on implementation. By the end, you should feel comfortable building a SOTA transformer model that runs on TPUs/GPUs, sharding it across devices, and training it at scale with techniques used in state-of-the-art systems. We wrote this guide because, as learners ourselves, we experienced the same lack of practical resources.
+This guide is a practical, code-first walkthrough of scaling modern transformers in JAX. Our goal is to bridge the gap between high-level scaling theory and hands-on implementation. By the end, you should feel comfortable building a SOTA transformer model that runs on TPUs/GPUs, sharding it across devices, and training it at scale with techniques used in state-of-the-art systems.
 
 ## Prerequisites
 
@@ -130,7 +129,3 @@ Here’s how the guide is structured:
 - **[Part 6: Mixture of Experts](moe)** — implementing and training MoE layers, covering routing, stability, and efficiency challenges.  
 - **[Part 7: Final Run](final_run)** — putting it all together: multi-host scripts, launching large runs across TPU pods, and analyzing results.  
 - **[Part 8: Conclusions](conclusion)** — lessons learned, future directions like DualPipe and expert parallelism, and additional resources.  
-
-## Why This Matters
-
-Scaling isn’t just about making models bigger. It's also about making them efficient. At today’s frontier, even “small” LLMs run at the edge of hardware limits, and poor scaling can make promising ideas unusable in practice. Understanding how to tokenize huge datasets, shard parameters, overlap communication with compute, and keep accelerators busy is what makes modern research and production possible.  
