@@ -3,7 +3,7 @@ layout: distill
 title: "Sharded Model"
 permalink: /sharded/
 description: "Here we discuss 4 main parallelism techniques used for scaling LLMs: data parallelism, fully-sharded data parallelism (FSDP), pipeline parallelism and tensor parallelism. For each, we discuss their theory and a scalable implementation."
-date: 2025-09-04
+date: 2025-09-05
 future: true
 htmlwidgets: true
 hidden: false
@@ -909,7 +909,7 @@ class Embedding(nn.Module):
 The next module that needs to change is the RoPE logic since the cos/sin matrices need to spilt for the channels that are on the device. Thus we only need to make changes in the setup method to slice the matrices. To do this, we find the current index in the `tp` axis and the size to find how many channels will be on each device, we call this the `slice_factor`. Then we use `jax.lax.dynamic_slice_in_dim` which is essentially `arr[..., start_idx: start_idx + length` but works under a `jit` context with dynamic values (values not known at compile time). We find the `start_idx` by multiplying the `idx * slice_factor` since that adds up the slices for the previous devices. This is done on the `axis=-1` since that is the channel axis.
 
 ![[pasted 10.png]]
-_RoPE under Tensor Parallelism
+\_RoPE under Tensor Parallelism
 
 ```python
 class RoPE(nn.Module):

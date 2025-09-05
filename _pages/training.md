@@ -3,7 +3,7 @@ layout: distill
 title: "Training Results"
 permalink: /training/
 description: "Description goes here. see deepmind for reference"
-date: 2025-09-04
+date: 2025-09-05
 future: true
 htmlwidgets: true
 hidden: false

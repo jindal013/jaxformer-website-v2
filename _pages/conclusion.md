@@ -3,7 +3,7 @@ layout: distill
 title: "Conclusion"
 permalink: /conclusion/
 description: "Description goes here. see deepmind for reference"
-date: 2025-09-04
+date: 2025-09-05
 future: true
 htmlwidgets: true
 hidden: false
@@ -13,7 +13,7 @@ section_number: 8
 previous_section_url: ../training
 previous_section_name: "Part 7: Training Results"
 
-next_section_url: 
+next_section_url:
 next_section_name: "The End"
 
 bibliography: main.bib
@@ -33,12 +33,11 @@ authors:
 #     for hyperlinks within the post to work correctly.
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
-
   - name: Where Does the Time Go?
   - subsections:
-    - name: "Visualizing rooflines"
-    - name: "Matrix multiplication"
-    - name: "Network communication rooflines"
+      - name: "Visualizing rooflines"
+      - name: "Matrix multiplication"
+      - name: "Network communication rooflines"
   - name: A Few Problems to Work
 
 # Below is an example of injecting additional post-specific styles.
@@ -61,4 +60,4 @@ _styles: >
   }
 ---
 
-Main content goes here. to change: TOC, Gisucus. 
+Main content goes here. to change: TOC, Gisucus.
