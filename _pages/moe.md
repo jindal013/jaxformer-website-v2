@@ -397,8 +397,6 @@ where $s_{i,t}$ is the unnormalized score, essentially counting how many times f
 
 $$
 P_i =  \frac{1}{T} \sum_{t=1}^T S_{i,t}
-
-
 $$
 
 where $S_{i,t} = \frac{s_{i,t}}{\sum_{j=1}^{N} s_{j,t}}$. Thus we can compute $f, P$ as a function and return it as a metric. This promotes a uniform distribution over experts since it penalizes each expert for being used more times ($f_i$ becomes larger).

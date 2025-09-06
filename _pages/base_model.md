@@ -36,22 +36,22 @@ toc:
   - name: Root-Mean Squared Norm
   - name: Embedding
   - subsections:
-      - name: Embedding Lookup
-      - name: Weight Tying
+    - name: Embedding Lookup
+    - name: Weight Tying
   - name: FeedForward
   - name: RoPE
   - subsections:
-      - name: Mathematical Intuition
-      - name: Implementation in JAX
+    - name: Mathematical Intuition
+    - name: Implementation in JAX
   - name: Multi-Latent Attention
   - subsections:
-      - name: Low-Rank Attention Motivation
-      - name: Implementation and Caching
+    - name: Low-Rank Attention Motivation
+    - name: Implementation and Caching
   - name: Interleaved Attention Layers
   - name: Transformer Model
   - subsections:
-      - name: Forward Pass and Caching
-      - name: Configuration and Initialization
+    - name: Forward Pass and Caching
+    - name: Configuration and Initialization
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -271,7 +271,7 @@ x_d
 \end{bmatrix}
 $$
 
-where $m$ is the time position and each $( 2 \times 2)$ $R(m)$ block is
+where $m$ is the time position. We can also define $R(m \theta_k)$ block as
 
 $$
 R(m\theta_k) =
@@ -281,16 +281,16 @@ R(m\theta_k) =
 \end{bmatrix}.
 $$
 
-Equivalently, in paired coordinates $(2k-1,2k)$:
+and then in paired coordinates $(2k-1,2k)$:
 
 $$
 \begin{bmatrix}
-x'_{2k-1}\\[2pt] x'_{2k}
+x'_{2k-1}\\ x'_{2k}
 \end{bmatrix}
 =
-R(m\theta*k)
+R(m\theta_k)
 \begin{bmatrix}
-x*{2k-1}\\[2pt] x\_{2k}
+x_{2k-1}\\ x_{2k}
 \end{bmatrix},
 \qquad k=1,\dots,\tfrac{d}{2}.
 $$
