@@ -3,7 +3,7 @@ layout: distill
 title: "Jaxformer"
 subtitle: "Scaling Modern Transformers"
 permalink: /
-description: "This is a zero-to-one guide on scaling modern transformers with n-dimensional parallelism. Transformers have driven much of the deep learning revolution, yet no practical guide reflects SOTA architectures and the complexities of large-scale language modelling. While excellent resources such as DeepMind’s 'How to Scale Your Model' and HuggingFace’s 'Ultra Scale Playbook' exist, a gap remains between theory and end-to-end implementation. We aim to bridge that gap by showing you how to scale a model from scratch (in Jax, with code) to current standards."
+description: "This is a zero-to-one guide on scaling modern transformers with n-dimensional parallelism. Transformers have driven much of the deep learning revolution, yet no practical guide reflects SOTA architectures and the complexities of large-scale language modelling. While excellent resources such as DeepMind’s \"How to Scale Your Model\" and HuggingFace’s \"Ultra Scale Playbook\" exist, a gap remains between theory and end-to-end implementation. We aim to bridge that gap by showing you how to scale a model from scratch (in Jax, with code) to current standards."
 date: 2025-09-05
 future: true
 htmlwidgets: true
@@ -87,14 +87,14 @@ _styles: >
 
 ## Code & Contact
 
-Find the complete code for this guide on our [GitHub repository](https://github.com/divyamakkar0/Jaxformer).  
-More information about the authors can be found on the [Conclusions page](https://jaxformer.com/conclusion).
+Find the complete code for this guide on our [GitHub repository](https://github.com/divyamakkar0/Jaxformer).
+More information about the authors can be found in the [Conclusion](https://jaxformer.com/conclusion).
 
 ## Introduction
 
-Modern transformers are at the heart of today’s deep learning systems, but taking them from a single-GPU prototype to a multi-node cluster is not straightforward. Scaling efficiently requires understanding how data moves through the hardware, how models can be split across devices, and how training infrastructure ties everything together.  
+Modern transformers are at the heart of today’s deep learning systems, but taking them from a single-GPU prototype to a multi-node cluster is not straightforward. Scaling efficiently requires understanding how data moves through the hardware, how models can be split across devices, and how training infrastructure ties everything together.
 
-This guide is a practical, code-first walkthrough of scaling modern transformers in JAX. Our goal is to bridge the gap between high-level scaling theory and hands-on implementation. By the end, you should feel comfortable building a SOTA transformer model that runs on TPUs/GPUs, sharding it across devices, and training it at scale with techniques used in state-of-the-art systems.
+This guide is a practical, code-first walkthrough of scaling modern transformers in JAX. Our goal is to bridge the gap between high-level scaling theory and hands-on implementation. By the end, you should feel comfortable building a SOTA transformer model that runs on TPUs/GPUs, sharding it across devices, and training it at scale with techniques used in SOTA systems.
 
 ## Prerequisites
 
@@ -109,11 +109,11 @@ Prior to reading this guide, we assume you are famiilar with the following topic
 
 By the end of this guide, you should be able to:
 
-- Understand how to tokenize and stream large datasets efficiently for training.  
-- Estimate the compute, memory, and communication costs of running a transformer model.  
-- Select and combine parallelism schemes (data, tensor, pipeline, FSDP, MoE) for a given hardware setup.  
-- Confidently configure and launch distributed training runs on multi-host TPU or GPU clusters.  
-- Recognize bottlenecks that prevent strong scaling and know how to address them.  
+- Understand how to tokenize and stream large datasets efficiently for training.
+- Estimate the compute, memory, and communication costs of running a transformer model.
+- Select and combine parallelism schemes (data, tensor, pipeline, FSDP, MoE) for a given hardware setup.
+- Confidently configure and launch distributed training runs on multi-host TPU or GPU clusters.
+- Recognize bottlenecks that prevent strong scaling and know how to address them.
 
 This is v1.0. We aim to update the guide sporadically as we implement more complex ideas and architectures in the future.
 
@@ -121,11 +121,11 @@ This is v1.0. We aim to update the guide sporadically as we implement more compl
 
 Here’s how the guide is structured:
 
-- **[Part 1: Tokenization at Scale](tokenization)** — how to preprocess massive datasets, shard them, and checkpoint safely for distributed training.  
-- **[Part 2: Base Model](base_model)** — building a transformer in JAX with modules like RMSNorm, RoPE, and Multi-latent Attention.  
-- **[Part 3: Sharded Model](sharded)** — introducing parallelism strategies (data, tensor, pipeline, FSDP) and applying them to transformer layers.  
-- **[Part 4: Distributed Training](distributed_training)** — how to set up TPU/GPU clusters, manage checkpoints, and synchronize training loops.  
-- **[Part 5: Dataset & Configs](dataset_class)** — structured configs for datasets, hyperparameters, and runtime options.  
-- **[Part 6: Mixture of Experts](moe)** — implementing and training MoE layers, covering routing, stability, and efficiency challenges.  
-- **[Part 7: Final Run](final_run)** — putting it all together: multi-host scripts, launching large runs across TPU pods, and analyzing results.  
-- **[Part 8: Conclusions](conclusion)** — lessons learned, future directions like DualPipe and expert parallelism, and additional resources.  
+- **[Part 1: Tokenization at Scale](tokenization)** — how to preprocess massive datasets, shard them, and checkpoint safely for distributed training.
+- **[Part 2: Base Model](base_model)** — building a transformer in JAX with modules like RMSNorm, RoPE, and Multi-latent Attention.
+- **[Part 3: Sharded Model](sharded)** — introducing parallelism strategies (data, tensor, pipeline, FSDP) and applying them to transformer layers.
+- **[Part 4: Distributed Training](distributed_training)** — how to set up TPU/GPU clusters, manage checkpoints, and synchronize training loops.
+- **[Part 5: Dataset & Configs](dataset_class)** — structured configs for datasets, hyperparameters, and runtime options.
+- **[Part 6: Mixture of Experts](moe)** — implementing and training MoE layers, covering routing, stability, and efficiency challenges.
+- **[Part 7: Final Run](final_run)** — putting it all together: multi-host scripts, launching large runs across TPU pods, and analyzing results.
+- **[Part 8: Conclusions](conclusion)** — lessons learned, future directions like DualPipe and expert parallelism, and additional resources.
