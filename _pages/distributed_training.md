@@ -127,6 +127,11 @@ def init_devices(
     return mesh
 ```
 
+The three different axes represent the different parallelism strategies we have and can be visualized as shown below.
+
+{% include figure.liquid path="assets/img/distributed/triple-axis-shard.png" class="img-fluid" caption="Final triple-axis shard visualization" %}
+
+
 ## Training Infrastructure
 
 With the helper functions established, we can now begin the `main` training loop function. Our main function will take in the `config` we described earlier. Since we are assuming this script is for `3-D` parallelism, we can assign variables to the device size for each axis and setup the key with the initial seed.

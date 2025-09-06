@@ -69,9 +69,15 @@ _styles: >
 
 ## Motivation and Challenges
 
+<<<<<<< HEAD
 A recent advancement in scaling LLMs to larger networks has been through the introduction of Mixture of Experts (MoE) modules in the decoder. Training MoE models are primarily difficult for 2 reasons. The first, is due to training stability. This involves ensuring each expert gets roughly the same number of tokens otherwise, it can lead to expert collapse. Luckily for us, the hard work is done and lots of open-source models provide strong training recipes that we can use. The second is training efficiency, as you want to ensure that you are utilizing your accelerators to their max, and they aren't idle while training. We will be writing MoE similar to the Deepseek V3 paper. Additionally, distributed techniques such as expert parallelism are not being included, but we provide a general overview on how to incorporate it.
+=======
+A recent advancement in scaling LLMs to larger networks has been through the introduction of Mixture of Experts (MoE) modules in the decoder.  Training MoE models are primarily difficult for 2 reasons. The first, is due to training stability. This involves ensuring each expert gets roughly the same number of tokens otherwise, it can lead to expert collapse. Luckily for us, the hard work is done and lots of open-source models provide strong training recipes that we can use. The second is training efficiency, as you want to ensure that you are utilizing your accelerators to their max, and they aren't idle while training. We will be writing MoE similar to the Deepseek V3 paper. Additionally, distributed techniques such as expert parallelism are not being included, but we provide a general overview on how to incorporate it. Below are images representing this architecture.
+>>>>>>> 032890385e1e2156b8ea2995e8a443d6e74abaef
 
-{% include figure.liquid path="assets/img/moe/1.png" class="img-fluid" caption="MoE layer from DeepSeek V3" %}
+{% include figure.liquid path="assets/img/moe/moe_arch.png" class="img-fluid" caption="Single Block MoE Transformer" %}
+
+{% include figure.liquid path="assets/img/moe/moe_routed.png" class="img-fluid" caption="MoE layer from DeepSeek V3" %}
 
 ## Router Design
 
