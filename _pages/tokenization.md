@@ -139,10 +139,10 @@ for tokens, doc_id in pool.imap(tokenize, fw, chunksize=16):
   if shard_index >= 0 and shard_index < TEST_SPLIT:
         split = 'test/'
         shard_index_number = shard_index
-    else:
-      split = 'train/'
-      shard_index_number = shard_index - TEST_SPLIT
-    split_name = split[:-1]
+  else:
+    split = 'train/'
+    shard_index_number = shard_index - TEST_SPLIT
+  split_name = split[:-1]
 ...
 ```
 
