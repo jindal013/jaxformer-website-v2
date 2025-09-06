@@ -140,7 +140,7 @@ Array([[0, 1, 2, 3], [4, 5, 6, 7]], dtype=int32) #b
 Array([[ 0, 2, 4, 6], [ 8, 10, 12, 14]], dtype=int32) #c
 ```
 
-In the case where the whole vector c should be replicated across the devices, the following changes would need to be made. In the device-wise vector addition function, each device does element wise addition on its shard. Then, the first `all_gather`, along the mesh axis `x` concatenates the results along dimension `0` of the array. This results in each device along the same column with the same data, essentially collecting all elements column-wise. Then, the same is done row-wise along the `y` axis/dimension 1. The final local result is an array of shape `(2,4)`, essentially replicated across each device. So, the `shard_map` function on the bottom, calls the `vec_addition` function on each device which does local addition, then all gathers all elements for each device in the mesh defined above. The input vectors a and b are sharded across all the devices; however, the output remains `P()` because it means the output is replicated on all devices, instead of staying sharded. Then, the argument `check_vma=False` is passed because since JAX use vma to ensure the shardings are right, but it cannot infer that the all-gather has replicated the information fully. Thus, turning it off allows us to write whatever shardings we want and ensure correctness ourself (JAX compiler doesn't help anymore). In this case we know that what we have done replicates.
+In the case where the whole vector c should be replicated across the devices, the following changes would need to be made. In the device-wise vector addition function, each device does element wise addition on its shard. Then, the first `all_gather`, along the mesh axis `x` concatenates the results along dimension `0` of the array. This results in each device along the same column with the same data, essentially collecting all elements column-wise. Then, the same is done row-wise along the `y` axis/dimension 1. The final local result is an array of shape `(2,4)`, essentially replicated across each device. So, the `shard_map` function on the bottom, calls the `vec_addition` function on each device which does local addition, then all gathers all elements for each device in the mesh defined above. The input vectors a and b are sharded across all the devices; however, the output remains `P()` because it means the output is replicated on all devices, instead of staying sharded. Then, the argument `check_vma=False` is passed. VMA is JAX's sharding verifier; however, it cannot infer the result of certain operations, i.e the all-gather has replicated the arrays fully. Thus, turning it off allows us to write unchecked shardings which we know are correct.
 
 ```python
 def vec_addition(a, b):
@@ -261,13 +261,14 @@ class Dense(nn.Module):
       (self.features,),
       jnp.float32
     )
-        x, kernel, bias = jax.tree.map(
-            lambda x: x.astype(self.dtype), (x, kernel, bias)
-        )
 
-        x = jnp.einsum("...d,df->...f", x, kernel) + bias
+    x, kernel, bias = jax.tree.map(
+        lambda x: x.astype(self.dtype), (x, kernel, bias)
+    )
 
-        return x
+    x = jnp.einsum("...d,df->...f", x, kernel) + bias
+
+    return x
 ```
 
 ## Pipeline Parallelism
@@ -886,7 +887,7 @@ class Embedding(nn.Module):
             x = jax.lax.all_to_all(
                 x, "tp", split_axis=x.ndim - 1, concat_axis=x.ndim - 2, tiled=True
             )
-      if self.is_mutable_collection("params"):
+            if self.is_mutable_collection("params"):
                 _ = self.norm(x)
         else:
             x = self.norm(x)
@@ -915,9 +916,9 @@ class RoPE(nn.Module):
     self.cos = jax.lax.dynamic_slice_in_dim(
             cos, slice_factor * idx, slice_factor, axis=-1
         )
-        self.sin = jax.lax.dynamic_slice_in_dim(
-            sin, slice_factor * idx, slice_factor, axis=-1
-        )
+    self.sin = jax.lax.dynamic_slice_in_dim(
+        sin, slice_factor * idx, slice_factor, axis=-1
+    )
 ```
 
 ### Attention
@@ -973,14 +974,14 @@ class MLA(nn.Module):
     ...
     output = scaledDotProd(q, k, v, mask)
 
-        output = jax.lax.all_to_all(
-            output, "tp", split_axis=3, concat_axis=1, tiled=True
-        )
+    output = jax.lax.all_to_all(
+        output, "tp", split_axis=3, concat_axis=1, tiled=True
+    )
 
-        output = rearrange(output, "B nh T dk -> B T (nh dk)")
+    output = rearrange(output, "B nh T dk -> B T (nh dk)")
 
-        output = Dense(features=self.model_dimension, dtype=self.model_dtype(output)
-        output = nn.Dropout(rate=self.dropout)(output, deterministic=not train)
+    output = Dense(features=self.model_dimension, dtype=self.model_dtype(output)
+    output = nn.Dropout(rate=self.dropout)(output, deterministic=not train)
 
     return output, (KV_cache, KR_cache)
 ```
