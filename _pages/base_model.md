@@ -35,11 +35,23 @@ authors:
 toc:
   - name: Root-Mean Squared Norm
   - name: Embedding
+  - subsections: 
+    - name: Embedding Lookup
+    - name: Weight Tying
   - name: FeedForward
   - name: RoPE
+  - subsections: 
+    - name: Mathematical Intuition
+    - name: Implementation in JAX
   - name: Multi-Latent Attention
+  - subsections: 
+    - name: Low-Rank Attention Motivation
+    - name: Implementation and Caching
   - name: Interleaved Attention Layers
   - name: Transformer Model
+  - subsections: 
+    - name: Forward Pass and Caching
+    - name: Configuration and Initialization
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -104,6 +116,8 @@ class RMSNorm(nn.Module):
 
 ## Embedding
 
+### Embedding Lookup
+
 The embedding layer helps convert tokens into continuous $n$ dimensional vectors. For this class, we can use JAX's flexibility when initializing our class using a PyTorch init pattern in the `setup` method.
 
 ```python
@@ -159,6 +173,8 @@ def __call__(self, x: Array, out: bool = False) -> Array:
 
     return x
 ```
+
+### Weight Tying
 
 For the second-pass (weight-tying) we first pass `x` through the norm and then use the built in `embed.attend(x)` function to perform the transposed matmul. Our final embedding class is shown below.
 
@@ -229,6 +245,8 @@ class FeedForward(nn.Module):
 Note that since JAX is functional, for features such as `Dropout`, we pass parameters to allow the functions to remain pure, rather then relying on state.
 
 ## RoPE
+
+### Mathematical Intuition
 
 Rotary Positional Embeddings allow for relative embeddings based on applying standard euclidean 2D-rotation to each $2$ dimensional subspaces of the $n$ dimensional vector. We can represent this as
 
@@ -326,6 +344,8 @@ x*d
   \end{pmatrix}
   \end{equation}
 $$
+
+### Implementation in JAX
 
 To implement this, we can create the cosine and sine vectors and then perform the necessary tensor ops on $x$ during the forward pass. We begin the class like a standard JAX module; however, unlike the others, this will have no params in it. We just use this class to allow for lazy initialization with the other classes that call it, such as Multi-Head Latent Attention.
 
@@ -470,9 +490,13 @@ class RoPE(nn.Module):
 
 ## Multi-Latent Attention
 
+### Low-Rank Attention Motivation
+
 We now write the core attention mechanism of the model. We will use multi-latent attention introduced in [DeepSeek-V2](https://arxiv.org/pdf/2405.04434). The driving idea is motivated by how to save inference-time memory. In a standard KV-cache, our transformer has to save $2LTd$ elements as for each key/value pair in a layer, we have $T$ time steps for which the dimension is $d$. Now, consider a transformer with a sequence length of $T = 128k$, dimension of $d = 7168$ and layers $L = 61$. If the KV cache is stored in `bfloat16` this leads to $\frac{2 \cdot 61 \cdot 128 \cdot 10^3 \cdot 7168 \cdot 2}{10^9} \approx 220GB$ of memory constraints. There exists solutions to optimize this such as Grouped Query Attention or Multi Query Attention (when $n_{\text{groups}}$ equals 1); however, these often lead to a decrease in quality. Multi latent attention attempts to fix this using the idea of [Low-Rank decomposition](https://en.wikipedia.org/wiki/Low-rank_approximation) . Instead of using $K = W^k x$ and $V = W^v x$. we decompose the $W^k$ and $W^v$ into a matrix-matrix product $W^K = AB$ where $A \in \mathbb{R}^{d \times r}$ and $B \in \mathbb{R}^{r \times d}$ where $r << d$. This way we use $2dr$ space instead of $2d^2$ and thus grow linearly with $d$ instead of quadratically. In terms of the cache, we now store $Bx$ instead of $W^Kx = ABx$. This means our memory is now $2LTr$, which in terms of the previous example, is roughly $33$ GB.
 
 To further save memory, we can use the same $B$ matrix for the key and values, thus $W^K = A^KB$ and $W^V = A^V B$. This means we can get rid of the 2 factor, further cutting our memory in half to $\approx 16$GB. Note this does trade memory for compute; however, in these cases, we are memory bound which appeals to the idea of MLA.
+
+### Implementation and Caching
 
 Thus we begin by defining our module, with our hyper-parameters.
 
@@ -913,6 +937,8 @@ We keep an array for the two separate caches appending if the cache is not None 
 
 ## Transformer Model
 
+### Forward Pass and Caching
+
 We can now write the final Transformer Model essentially looping through $n$ blocks.
 
 The first step is to check if the cache input is not `None`, as that indicates we only want the last token. We can then reshape the input into a `(B, T)` tensor.
@@ -995,6 +1021,8 @@ class Transformer(nn.Module):
 
   return x_out, out_cache
 ```
+
+### Configuration and Initialization
 
 This is not the final model we are using for training since in native JAX, it is not simple to split across `n-D` parallelism and we want to stay away from abstractions provided by Flax which operate as a blackbox over the network. To simplify construction of the transformer, we can create a data class to represent the arguments to the constructor and create a static method that will load the transformer.
 

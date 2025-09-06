@@ -34,7 +34,15 @@ authors:
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
   - name: The Dataset Class
+  - subsections: 
+    - name: Initialization and Setup
+    - name: Downloading Shards
+    - name: Processing Shards
+    - name: Iteration and Utilities
   - name: Configs
+  - subsections: 
+    - name: Config Classes
+    - name: Argument Parsing and Wrapper
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -57,6 +65,8 @@ _styles: >
 ---
 
 ## The Dataset Class
+
+### Initialization and Setup
 
 Beginning with the `Dataset` constructor, a `process_path` variable is declared as it will store the location of a shard's download from the GC Bucket.
 
@@ -108,6 +118,8 @@ class Dataset:
         except OSError as e:
             print(f"{self.dir_name} already exists")
 ```
+
+### Downloading Shards
 
 Another important instantiation is the `self.data` variable which holds a list of names containing the shards to be downloaded. The `bucket_name` and `self.id` (folder name) are taken as parameters and return a list containing all the names in the GCP bucket with the prefix identifier. Due to this, the folder name is also included which is why the first index in the resulting list is excluded.
 
@@ -195,6 +207,8 @@ class Dataset:
             log(f"Done downloading {result}")
 ```
 
+### Processing Shards
+
 When the `load_next_shard()` function is called, it calls `self.download_next()` which was explained above. Once the shard has been downloaded, it must be processed - rearranged to accommodate the batch size and mini batch sizes for data/pipeline parallelism, and reshaped into the x and y datasets. This is done with the `process_prev` function which begins by using `np.load(self.process_path)` to load the `.npy` shard that was downloaded to the `self.process_path` to a numpy array called `data`. The features for the dataset are loaded started from the beginning of the data array, leaving out the last index. The labels start from the first index (note the data is 0-indexed) till the end of the array. The reason why the labels is shifted one value is due the nature of predicting the next token. For the 0th token of data, the next token to be predicted is the 1st index, hence the reason why the features stop at the `[:-1]` index as the last token is the predictor for the second last token.
 
 ```python
@@ -255,6 +269,8 @@ class Dataset:
 
         os.remove(self.process_path)
 ```
+
+### Iteration and Utilities
 
 Additionally, within the `Dataset` class, we have the length function which returns the number of batches available in the current loaded shard (0th dimension). Additionally, the `__call__` method is used to fetch the next batch of inputs and labels sequentially. The `step_idx` variable increments each call and if the index exceeds all the batches in the current shard, it means we have exceeded all the batches and we can reset the idx to 0 and load the next shard. A batch is extracted by slicing the dataset labels from `step_idx : step_idx + step`. This provides exactly step samples, which aids in the implementation of gradient accumulation. Finally, `step_idx` is incremented by `step`, so that the next call fetches the following batch. This creates a continuous stream of batches across shards.
 
@@ -323,6 +339,8 @@ class Dataset
 More advanced data loading techniques can be used such as disturbed data loading however we are able to bypass this and use this dataloader on a multi-node setting since the data chunks are in shards and thus it is still efficient for every process to download duplicate data.
 
 ## Configs
+
+### Config Classes
 
 Here are the configs found in the `utils.py`. Beginning with the different config classes, they are configured for the model, dataset processing, learning rate/optimizer configs, device config for distributed training and inference config respectively.
 
@@ -393,6 +411,8 @@ class config:
     wandb: bool = True
     grad_clip_norm: float = 1.0
 ```
+
+### Argument Parsing and Wrapper
 
 Then, the `parse_args()` function is designed to parse command line arguments in regards to the model call.
 

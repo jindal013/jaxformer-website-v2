@@ -34,8 +34,18 @@ authors:
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
   - name: Foundations of Sharding
+  - subsections:
+      - name: "Mesh and Shard Map"
+      - name: "Replication with All-Gather"
   - name: Data Parallelism
+  - subsections:
+      - name: "Gradient Averaging"
+      - name: "Fully-Sharded Data Parallelism"
   - name: Pipeline Parallelism
+  - subsections:
+      - name: "Naive Pipeline and GPipe"
+      - name: "Parameter Partitioning for Pipeline"
+      - name: "Forward Pass and GPipe Execution"
   - name: Tensor Parallelism
   - subsections:
       - name: "RMSNorm"
@@ -98,6 +108,8 @@ CpuDevice(id=6),
 CpuDevice(id=7)]
 ```
 
+### Mesh and Shard Map
+
 Before explicitly sharding tensors across devices, we can create a `jax.sharding.Mesh` to define a grid of available devices, reshaping them into custom configurations and assigning a name to their axes. This allows for multi-dimension sharding along the defined axes (for example, data parallelism along one axis and pipeline parallelism on the other). In this case, since we have simulated 8 devices, they have been split into a $2 \times 4$ configuration along the `x` and `y` axes respectively (note the names are arbitrary, `x` represents the axis with 2 devices and `y` represents the axis with 4 devices).
 
 ```python
@@ -140,6 +152,8 @@ Array([[0, 1, 2, 3], [4, 5, 6, 7]], dtype=int32) #b
 Array([[ 0, 2, 4, 6], [ 8, 10, 12, 14]], dtype=int32) #c
 ```
 
+### Replication with All-Gather
+
 In the case where the whole vector c should be replicated across the devices, the following changes would need to be made. In the device-wise vector addition function, each device does element wise addition on its shard. Then, the first `all_gather`, along the mesh axis `x` concatenates the results along dimension `0` of the array. This results in each device along the same column with the same data, essentially collecting all elements column-wise. Then, the same is done row-wise along the `y` axis/dimension 1. The final local result is an array of shape `(2,4)`, essentially replicated across each device. So, the `shard_map` function on the bottom, calls the `vec_addition` function on each device which does local addition, then all gathers all elements for each device in the mesh defined above. The input vectors a and b are sharded across all the devices; however, the output remains `P()` because it means the output is replicated on all devices, instead of staying sharded. Then, the argument `check_vma=False` is passed. VMA is JAX's sharding verifier; however, it cannot infer the result of certain operations, i.e the all-gather has replicated the arrays fully. Thus, turning it off allows us to write unchecked shardings which we know are correct.
 
 ```python
@@ -169,6 +183,8 @@ That concludes an introduction to distributed training in JAX. These principles 
 
 ## Data Parallelism
 
+### Gradient Averaging
+
 There exist numerous parallelism strategies (data, tensor, pipeline) for training large language models. Data parallelism, as the name suggests, involves replicating the model across compute whilst parallelizing the data. At its core, data parallelism splits the batch size of the input shape `(B, T, C)` into smaller batches that are distributed across `n` devices `(B/n, T, C)`. In this way, we can increase the batch size as each device processes a subset of the data independently, in parallel. After computing the forward pass and obtaining the gradients, they are averaged across all the devices, using the `jax.lax.pmean(x, axis_name)`operation and updated across every model. Since the weights are replicated (have partition spec of `P()`) JAX automatically does a gradient sync. This operation, performs an all-reduce mean on `x` along the `axis_name` in the grid mesh of devices and thus the gradients will sync when `jax.grad` is called.
 
 ```python
@@ -182,6 +198,8 @@ def loss_fn(...):
 The advantages of data parallelism allow for large-scale training with low communication bottlenecks as there is only one communication required. One of the main disadvantages of it is that the model is required to fit on each device, this can be infeasible as the model grows, hence data parallelism is often combined with other strategies including pipeline and tensor parallelism.
 
 {% include figure.liquid path="assets/img/sharded/3.png" class="img-fluid" caption="Data parallelism with the model replicated across all GPUs whilst the batch is split into smaller batch sizes" %}
+
+### Fully-Sharded Data Parallelism
 
 Pure data parallelism doesn't require changes in our model class. However, the biggest downside of data parallelism is that the model needs to be replicated in each instance. This leads to large memory usage. A way to fix this is to use an extension of DP known as Fully-Sharded Data Parallelism, where each model keeps a subset of the parameters and performs all-gathers to ensure that only a single instance of the parameters are replicated. The same goes for the gradients and optimizer states. To implement this, we only need to ensure the parameters are sharded since our gradients and optimizer state are as computed and sharded in the same partition spec as the parameters they represent.
 
@@ -273,6 +291,8 @@ class Dense(nn.Module):
 
 ## Pipeline Parallelism
 
+### Naive Pipeline and GPipe
+
 Pipeline parallelism is another parallelism technique that allows for training LLMs across distributed nodes. While data parallelism works well for smaller to intermediate models, when the model size increases, it becomes difficult to scale as the model can no longer fit on a single device. Hence, in such cases, strategies that parallelize the model instead of the data need to be used. In pipeline parallelism, the model is split vertically. This means the layers of the model are partitioned on different devices, for example, a transformer with 16 layers and 4 homogenous devices are split evenly (4 consecutive layers per device). The input batch passes through the first device with the first `n` layers, then the output of that device is passed to the next device through the next `n` layers and etc. The backwards pass is formed in the opposite direction from the last device, computing the gradient for the last `n` layers, then computing the back propagation through the next device and etc. Pipeline Parallelism is advantageous because each device requires a portion of the model, allowing for more scaling as memory requirements are reduced. Due to the nature of this parallelism, the following computation graph can be created.
 
 {% include figure.liquid path="assets/img/sharded/5.png" class="img-fluid" caption="Naive Pipeline Parallelism" %}
@@ -320,6 +340,8 @@ $$
 $$
 
 Note that when $m = 1$, this equation becomes the same equation above. So, increasing the size of the mini batches, results in a smaller ratio of bubble-time wasted; however, we cannot infinitely increase the mini batch size because that will result in an underutilization of the GPUs and increase in communication costs, so we must maintain a balance between the two. GPipe papers have that when $m \geq 4n$, the communication cost becomes negligible.
+
+### Parameter Partitioning for Pipeline
 
 There are two main challenges when implementing pipeline. The first is the actual forward/backward pass and the second is setting up the parameters. We begin by setting up the parameters.
 
@@ -439,7 +461,9 @@ def get_p_spec(...):
     return embed_p_spec, layer_p_spec
 ```
 
-We can then now begin writing the `init_weights` method. It will follow in similar structure to the `get_p_spec` function. We begin by getting the `out_spec`. Then, we will replace the `dp` axes in any of the layer partition with `None` for now since in initialization, we don't want to split the `Dense` kernel's across the `dp` axis.
+### Forward Pass and GPipe Execution
+
+We can now begin writing the `init_weights` method. It will follow in similar structure to the `get_p_spec` function. We begin by getting the `out_spec`. Then, we will replace the `dp` axes in any of the layer partition with `None` for now since in initialization, we don't want to split the `Dense` kernel's across the `dp` axis.
 
 ```python
 class shardedModel:

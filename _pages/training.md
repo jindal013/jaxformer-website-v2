@@ -34,7 +34,13 @@ authors:
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
   - name: Final Run Scripts
+  - subsections:
+    - name: Launcher and Run Scripts
+    - name: Cluster Setup and Config
   - name: Training Results
+  - subsections:
+    - name: Loss and Token Throughput
+    - name: Expert Utilization and Auxiliary Loss
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -57,6 +63,8 @@ _styles: >
 ---
 
 ## Final Run Scripts
+
+### Launcher and Run Scripts
 
 There are two main scripts that are significant for launching a training run. The first is found in the `launcher.sh` script which contains the IP addresses for all the TPUs as well as a command that launches a training run on each TPU. The command `printf "%s\n" "${IPS[@]}" | xargs -n 1 -P 0 -I {} bash run.sh {}` does the following:
 
@@ -114,6 +122,8 @@ ssh $USER@$IP "
 "
 echo "done commands"
 ```
+
+### Cluster Setup and Config
 
 For demonstration of the final training, we use the command below which was run across a cluster of 32 TPU-v4 devices across 8 controllers. (8 IPs for ssh).
 
@@ -187,9 +197,13 @@ In total this config yields 949,248,384 parameters with 343,321,728 active para
 
 ## Training Results
 
+### Loss and Token Throughput
+
 We only train until we hit 3.28 validation loss (inspired by nanoGPT speedrun) due to TRC compute limits. This was achieved after (26,100 steps) and in total $\sim 6.5$ billion tokens; however, with better compute and more time this could continue decreasing.
 
 {% include figure.liquid path="assets/img/final_run/1.png" class="img-fluid" %}
+
+### Expert Utilization and Auxiliary Loss
 
 Notably we avoid expert collapse as seen by the tokens per head and the auxiliary loss curves.
 
