@@ -346,9 +346,17 @@ Then, we create a frequency array `[1,2,3,...,T]` which will scale our $\theta$.
 freq = jnp.arange(self.T, dtype=jnp.float32)[:, None] + 1
 ```
 
-To setup the $\theta$, we first create an array of the powers of the base that yield each $\theta$. Specifically, $\theta_i = B^{-2i/d}$ , so we can represent the array as $[\theta_1, \theta_2, \ldots, \theta_{d / 2}] = B^{-2/d \cdot [1,2,\ldots, d/2]}$ .
+To setup the $\theta$, we first create an array of the powers of the base that yield each $\theta$. Specifically, $\theta_i = B^{-2i/d}$ , so we can represent the array as 
 
-Since our final array for $\sin/\cos$ is $\sin \left([\theta_1, \theta_1, \theta_2, \theta_2, \ldots, \theta_{d / 2}, \theta_{d/2}]\right)$ , we can repeat the elements along the second dim and then flatten it into one continuous array. Thus $pos = [0,0,1,1, \ldots, d/2, d/2]$ .
+$$
+[\theta_1, \theta_2, \ldots, \theta_{d / 2}] = B^{-2/d \cdot [1,2,\ldots, d/2]}.
+$$
+
+Since our final array for $\sin/\cos$ is $\sin \left([\theta_1, \theta_1, \theta_2, \theta_2, \ldots, \theta_{d / 2}, \theta_{d/2}]\right)$ , we can repeat the elements along the second dim and then flatten it into one continuous array. Thus,
+
+$$
+pos = [0,0,1,1, \ldots, d/2, d/2].
+$$
 
 ```python
 pos = jnp.arange(self.model_dim // 2, dtype=jnp.float32)[:, None]
@@ -362,7 +370,11 @@ log_theta_base = jnp.log(10000.0)
 theta = jnp.exp(-2 * pos / self.model_dim * log_theta_base)
 ```
 
-Finally, we create the final array of $\cos$ and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be $[[1 \theta_0, 1\theta_0 1\theta_1, \theta_1, \ldots, 1 \theta_{d/2} 1 \theta_{d/2}], \ldots, [T \theta_0, T \theta_0, \ldots, T \theta_{d/2}, T \theta_{d/2}]]$.
+Finally, we create the final array of $\cos$ and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be 
+
+$$
+[[1 \theta_0, 1\theta_0 1\theta_1, \theta_1, \ldots, 1 \theta_{d/2} 1 \theta_{d/2}], \ldots, [T \theta_0, T \theta_0, \ldots, T \theta_{d/2}, T \theta_{d/2}]].
+$$
 
 ```python
 class RoPE(nn.Module):
