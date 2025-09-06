@@ -3,7 +3,7 @@ layout: distill
 title: "Jaxformer"
 subtitle: "Scaling Modern Transformers"
 permalink: /
-description: "This is a zero-to-one guide on scaling modern transformers with n-dimensional parallelism. Transformers have driven much of the deep learning revolution, yet no practical guide reflects SOTA architectures and the complexities of large-scale language modelling. While excellent resources such as DeepMind’s \"How to Scale Your Model\" and HuggingFace’s \"Ultra Scale Playbook\" exist, a gap remains between theory and end-to-end implementation. We aim to bridge that gap by showing you how to scale a model from scratch (in Jax, with code) to current standards."
+description: "This is a zero-to-one guide on scaling modern transformers with n-dimensional parallelism. Transformers have driven much of the deep learning revolution, yet no practical guide reflects SOTA architectures and the complexities of large-scale language modelling. While excellent resources such as DeepMind’s <a href='https://jax-ml.github.io/scaling-book/' target='_blank'>How to Scale Your Model</a> and HuggingFace’s <a href='https://huggingface.co/spaces/nanotron/ultrascale-playbook' target='_blank'>Ultra Scale Playbook</a> exist, a gap remains between theory and end-to-end implementation. We aim to bridge that gap by showing you how to scale a model from scratch (in Jax, with code) to current standards."
 date: 2025-09-05
 future: true
 htmlwidgets: true
@@ -93,7 +93,7 @@ More information about the authors can be found in the [Conclusion](https://jaxf
 
 ## Introduction
 
-Modern transformers are at the heart of today’s deep learning systems, but taking them from a single-GPU prototype to a multi-node cluster is not straightforward. Scaling efficiently requires understanding how data moves through the hardware, how models can be split across devices, and how training infrastructure ties everything together.
+Modern transformers are at the heart of today's deep learning systems, but taking them from a single-GPU prototype to a multi-node cluster is not straightforward. Scaling efficiently requires understanding how data moves through the hardware, how models can be split across devices, and how training infrastructure ties everything together.
 
 This guide is a practical, code-first walkthrough of scaling modern transformers in JAX. Our goal is to bridge the gap between high-level scaling theory and hands-on implementation. By the end, you should feel comfortable building a SOTA transformer model that runs on TPUs/GPUs, sharding it across devices, and training it at scale with techniques used in SOTA systems.
 
@@ -120,7 +120,7 @@ This is v1.0. We aim to update the guide sporadically as we implement more compl
 
 ## Overview
 
-Here’s how the guide is structured:
+Here's how the guide is structured:
 
 - **[Part 1: Tokenization at Scale](tokenization)** — how to preprocess massive datasets, shard them, and checkpoint safely for distributed training.
 - **[Part 2: Base Model](base_model)** — building a transformer in JAX with modules like RMSNorm, RoPE, and Multi-latent Attention.
