@@ -213,7 +213,7 @@ def __call__(self, x, train=True):
 
 ### Scatter and Expert Inputs
 
-Now, we need to build the expert inputs which will be in the shape of`(n_experts, capacity, C)` describing the input to each expert. mFor this we write the scatter function. This is inspired by the routing logic in the Google MoE layers linked above and provides a pure-JAX way to determine and create the expert routing. We begin by reshaping the inputs into 2D Tensor: one for channels and the rest is treated like a batch dim.
+Now, we need to build the expert inputs which will be in the shape of`(n_experts, capacity, C)` describing the input to each expert. For this we write the scatter function. This is inspired by the routing logic in the Google MoE layers linked above and provides a pure-JAX way to determine and create the expert routing. We begin by reshaping the inputs into 2D Tensor: one for channels and the rest is treated like a batch dim.
 
 ```python
 class MoE(nn.Module):
