@@ -492,7 +492,7 @@ def __call__(
   B, T, C = x.shape # get dimension information
 ```
 
-Note we will return a tuple with the result of the attention and another tuple which will hold the caches for the Key-value pair and the RoPE (to be discussed later on).
+Note we will return a tuple with the result of the attention and another tuple which will hold the caches for the key-value pair and the RoPE (to be discussed later on).
 
 We first begin by projecting the `x` to the latent dim for the key-value pair and the queries.
 
@@ -549,7 +549,7 @@ def scaledDotProd(q, k, v, mask):
 
 Breaking this function down, the input `dtype` is recorded to ensure that after performing the attention computation in `jnp.float32`, it can be casted back to the right precision afterwards. We then covert our `q,k,v` to `jnp.float32`. The attention operation can be expressed using [einsum notation](https://rockt.ai/2018/04/30/einsum) and casted back to the original type.
 
-We can then create the mask, call the function.
+We can then create the mask and call the function.
 
 ```python
 mask = jnp.tril(
@@ -632,7 +632,7 @@ if not train:
 # build cache
 ```
 
-If the past cache isn't none, we want to append to along the $T$ axis which is the `1` index, otherwise we want to set it to the `kv_latent`. Thus a simple implementation allows us to set the `kv_latent` to the concat of the `KV_cache` if it is not none and the current latent since it will be of length 1 (since we are using the past key/value from the cache). We can then set the `KV_cache` to this.
+If the past cache isn't none, we want to append along the $T$ axis which is the `1` index, otherwise we want to set it to the `kv_latent`. Thus, a simple implementation allows us to set the `kv_latent` to the concat of the `KV_cache` if it is not none and the current latent as it will be of length 1 (since we are using the past key/value from the cache). We can then set the `KV_cache` to this.
 
 ```python
 x = Dense(features=2 * self.latent_dim, dtype=self.model_dtype)(x)
@@ -670,19 +670,19 @@ else:
   )
 ```
 
-At the ending we return following the signature of the function
+At the ending, we return following the signature of the function:
 
 ```python
 return output, (KV_cache, KR_cache)
 ```
 
-To improve the readability of the signatures in the future, we can use a type alias of
+To improve the readability of the signatures in the future, we can use a type alias of:
 
 ```python
 cache_type = Tuple[Optional[Array], Optional[Array]]
 ```
 
-Thus the final MLA class is
+Thus the final MLA class is:
 
 ```python
 class MLA(nn.Module):
@@ -802,7 +802,7 @@ class MLA(nn.Module):
 
 ## Interleaved Attention Layers
 
-Interleaved attention layers was introduced in [Cohere's Command A model](https://cohere.com/research/papers/command-a-technical-report.pdf). There they use sliding window attention with positional embeddings (RoPE) and a full attention with no positional embeddings. Here we use MLA attention for all layers in the block with decoupled RoPE but don't apply RoPE at the ending. This is relatively simple as we take a layer-per-block and on the last one set the `dhR = 0`. The class is shown below.
+The idea of interleaved attention layers was introduced in [Cohere's Command A model](https://cohere.com/research/papers/command-a-technical-report.pdf). There they use sliding window attention with positional embeddings (RoPE) and a full attention with no positional embeddings. Here we use MLA attention for all layers in the block with decoupled RoPE but don't apply RoPE at the ending. This is relatively simple as we take a layer-per-block and on the last one, set the `dhR = 0`. The class is shown below.
 
 We begin with the single layer which applies the pre-norm normalization, attention and feedforward network.
 
@@ -846,7 +846,7 @@ class Layer(nn.Module):
         return x, cache
 ```
 
-We can now just call $n$ layers per blocks.
+We can now just call $n$ layers per block.
 
 ```python
 class Block(nn.Module):
@@ -929,7 +929,7 @@ class Transformer(nn.Module):
         x = x.reshape(-1, T)
 ```
 
-We then add our embedding module and go through the `self.blocks`. In the end we apply the embedding again but use the `out=True` to perform the weight tying. Finally, we reshape into the original size. The final transformer block is shown below.
+We then add our embedding module and go through the `self.blocks`. In the end, we apply the embedding again but use the `out=True` to perform the weight tying. Finally, we reshape into the original size. The final transformer block is shown below.
 
 ```python
 class Transformer(nn.Module):
