@@ -72,6 +72,9 @@ _styles: >
     font-size: 16px;
   }
 ---
+Here is the base architecture we will building and reflects many of the components in modern-day transformers. 
+
+{% include figure.liquid path="assets/img/base_model/base_img.png" class="img-fluid" %}
 
 ## Root-Mean Squared Norm
 

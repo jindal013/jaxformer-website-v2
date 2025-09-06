@@ -195,6 +195,10 @@ We are using 8 devices for FSDP, 2 for pipeline and 2 for tensor. Here is the fi
 
 In total this config yields 949,248,384 parameters with 343,321,728 active parameters.
 
+We can also see the transformer training across the TPU cluster, showcasing the power of JAX's SPMD paradigm.
+{% include figure.liquid path="assets/img/final_run/tpu.png" class="img-fluid" %}
+
+
 ## Training Results
 
 ### Loss and Token Throughput
