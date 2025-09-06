@@ -68,14 +68,14 @@ _styles: >
 
 There are two main scripts that are significant for launching a training run. The first is found in the `launcher.sh` script which contains the IP addresses for all the TPUs as well as a command that launches a training run on each TPU. The command `printf "%s\n" "${IPS[@]}" | xargs -n 1 -P 0 -I {} bash run.sh {}` does the following:
 
-- `printf "%s\n" "${IPS[@]}" prints each address in the IPS variable on a seperate line
+- `printf "%s\n" "${IPS[@]}"` prints each address in the IPS variable on a seperate line
 - `| xargs` takes the argument from the ip and runs the command on all distributed devices at once
 - `-n 1` runs the command once per input item (each IP gets its own `bash run.sh {}` call)
 - `-P 0` runs as many process in parallel where each IP will be processed on a distinct device
 - `-I {}` placeholder for the IP argument
 - `bash run.sh {}` calls the `run.sh` script passing the IP as an argument
 
-```python
+```bash
 #!/bin/bash
 source .env
 
@@ -101,7 +101,7 @@ Essentially the purpose of this script is to execute `run.sh` with each individu
 4. Moving to the correct directory and resetting the samples in the folder. This is done with the `tmux send-keys -t $SESSION:0 'cd ~/Jaxformer && rm -rf samples && mkdir samples' C-m` command. `tmux send-keys` tells tmux the keystrokes to execute in the`-t $SESSION:0` in the target session in the first window specified by `:0`. Following that is the actual command to be typed in the session which essentially moves to the Jaxformer directory, removed the folder with samples and then recreates it, essentially resetting the samples. Then `C-m` is executed, which enters the command that was previously typed into the tmux session to run.
 5. General setup. The same command as the one above is repeated, except with different internal commands to be executed in the tmux sessions. Specifically, inside the Jaxformer directory, the file is refetched from the git origin and reset to get the latest version. Then, the`setupTPU.sh` script is ran to install the correct dependencies on the TPU, and finally the model is ran as seen in the `$command` variable.
 
-```python
+```bash
 #!/bin/bash
 
 IP=$1
