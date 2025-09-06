@@ -60,7 +60,7 @@ _styles: >
 
 There are two main scripts that are significant for launching a training run. The first is found in the `launcher.sh` script which contains the IP addresses for all the TPUs as well as a command that launches a training run on each TPU. The command `printf "%s\n" "${IPS[@]}" | xargs -n 1 -P 0 -I {} bash run.sh {}` does the following:
 
-- `printf "%s\n" "${IPS[@]}" prints each address in the IPS variable on a seperate line
+- `printf "%s\n" "${IPS[@]}"` prints each address in the IPS variable on a seperate line
 - `| xargs` takes the argument from the ip and runs the command on all distributed devices at once
 - `-n 1` runs the command once per input item (each IP gets its own `bash run.sh {}` call)
 - `-P 0` runs as many process in parallel where each IP will be processed on a distinct device
