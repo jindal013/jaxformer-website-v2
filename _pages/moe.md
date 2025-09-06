@@ -83,7 +83,7 @@ The router decides how to send each token by computing a score. In the DeepSeek-
 $$
 s_{i,t} = \sigma \left(u_t^Te_i\right)
 $$
-where $\sigma$ is the Sigmoid activation function. This can essentially be written as a dense layer with no bias since our tokens are transposed by definition due to being row-wise vectors. For simplicity, we also include the bias in our score function even though it has been shown at larger scales $\sim >100B$ params that they tend to cause training instabilities.  The vectors for each expert $e$ are known as the centroids, so the`Dense` network  can be described as one as well.
+where $\sigma$ is the Sigmoid activation function. This can essentially be written as a dense layer with no bias since our tokens are transposed by definition due to being row-wise vectors. For simplicity, we also include the bias in our score function even though it has been shown at larger scales $>100B$ params that they tend to cause training instabilities.  The vectors for each expert $e$ are known as the centroids, so the`Dense` network  can be described as one as well.
 
 The term centroids comes from the idea that we take the dot product with the center of mass of each expert and then select the top-$k$ tokens by similarity.
 
