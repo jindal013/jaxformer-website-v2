@@ -162,7 +162,7 @@ load = checkpoint_manager.latest_step() is not None
 
 ### Data Partitioning and Model Initialization
 
-We begin setting up our dataset. We first make the data partition. Every data shard that is loaded will be of the form `(G, M , B, T)` where `G` is the total batches in a shard, `M` are the microbatches in the batch (for pipelining), `B` is the batch size per microbatch and `T` is the sequence length. Thus we want the `M` to be split amongst the pipeline, `B` to be split amongst the data and `T` to be spilt initially along `Tensor` as discussed previously. Thus we obtain the following `PartitionSpec` and `NamedSharding` and can use it to initialize our dataset class written previously.
+We begin setting up our dataset. We first make the data partition. Every data shard that is loaded will be of the form `(G, M , B, T)` where `G` is the total batches in a shard, `M` is the microbatches in the batch (for pipelining), `B` is the batch size per microbatch and `T` is the sequence length. Thus we want the `M` to be split amongst the pipeline, `B` to be split amongst the data and `T` to be spilt initially along `Tensor` as discussed previously. Thus we obtain the following `PartitionSpec` and `NamedSharding` and can use it to initialize our dataset class written previously.
 
 ```python
 data_spec = P(None, "pp", "dp", "tp")
@@ -378,7 +378,7 @@ def loss_fn(...):
   log_probs = log_probs.reshape(M * B * T, V)
 ```
 
-Note that logits is `4D` originally since it is a tensor with dimensions defined as microbatch, batches per microbatch, sequence and vocab. We can get our cross-entropy loss by applying a vmap over and selecting the index that using a dynamic slice method, negating and then meaning it.
+Note that logits is `4D` originally since it is a tensor with dimensions defined as microbatch, batches per microbatch, sequence and vocab. We can get our cross-entropy loss by applying a vmap over and selecting the index that using a dynamic slice method, negating and then meaning over it.
 
 ```python
 def loss_fn(...):
