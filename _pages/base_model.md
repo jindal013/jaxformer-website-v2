@@ -72,7 +72,7 @@ _styles: >
     font-size: 16px;
   }
 ---
-Here is the base architecture we will building and reflects many of the components in modern-day transformers. 
+Here is the base architecture we will building and reflects many of the components in modern-day transformers.
 
 {% include figure.liquid path="assets/img/base_model/base_img.png" class="img-fluid" %}
 
@@ -655,7 +655,7 @@ if use_rope:
   k = jnp.concatenate([k, kRt], axis=-1)
 ```
 
-The last step is to setup the caching. The first change is in the RoPE block to find` t_start` since if we are using cached indices, we need to know which position to begin applying the RoPE from. To do this, we take the length of the cache as it represents our current index which we need to start from as tensor-indexing is 0-indexed.
+The last step is to setup the caching. The first change is in the RoPE block to find `t_start` since if we are using cached indices, we need to know which position to begin applying the RoPE from. To do this, we take the length of the cache as it represents our current index which we need to start from as tensor-indexing is 0-indexed.
 
 Thus our first line in the if statement of the rope block becomes:
 
