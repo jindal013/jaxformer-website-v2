@@ -83,22 +83,23 @@ class RMSNorm(nn.Module):
         rms = jnp.mean(jnp.square(x), axis=-1, keepdims=True)
         x = x / jnp.sqrt(rms + 1e-6)
 
-    gamma = self.param(
-      "gamma", 
-      nn.initializers.ones, 
-      (1, 1, x.shape[-1]), 
-      self.model_dtype
-      )
-    beta = self.param(
-      "beta", 
-      nn.initializers.zeros, 
-      (1, 1, x.shape[-1]), 
-      self.model_dtype
-      )
-    
-    x = x * gamma + beta
+        gamma = self.param(
+          "gamma",
+          nn.initializers.ones,
+          (1, 1, x.shape[-1]),
+          self.model_dtype
+        )
 
-    return x
+        beta = self.param(
+          "beta",
+          nn.initializers.zeros,
+          (1, 1, x.shape[-1]),
+          self.model_dtype
+        )
+
+        x = x * gamma + beta
+
+        return x
 ```
 
 ## Embedding
@@ -125,9 +126,9 @@ class Embeddings(nn.Module):
 ```python
 def __call__(self, x: Array, out: bool = False) -> Array:
     if not out:
-      # perform embedding loop
-  else:
-    # perform dot-product with transpose of the embedding params
+        # perform embedding loop
+    else:
+        # perform dot-product with transpose of the embedding params
     return x
 ```
 
@@ -136,10 +137,10 @@ For the embedding lookup we can pass our input `x = self.embedding(x)` through t
 ```python
 def __call__(self, x: Array, out: bool = False) -> Array:
     if not out:
-    x = self.embedding(x)
-      # perform embedding loop
-  else:
-    # perform dot-product with transpose of the embedding params
+        x = self.embedding(x)
+        # perform embedding loop
+    else:
+        # perform dot-product with transpose of the embedding params
 
     return x
 ```
@@ -149,12 +150,12 @@ A caveat of JAX is that the first forward-pass must initialize all the params, s
 ```python
 def __call__(self, x: Array, out: bool = False) -> Array:
     if not out:
-    x = self.embedding(x)
-      # perform embedding loop
-  if self.is_mutable_collection("params"):
+        x = self.embedding(x)
+        # perform embedding loop
+        if self.is_mutable_collection("params"):
             _ = self.norm(x)
-  else:
-    # perform dot-product with transpose of the embedding params
+    else:
+        # perform dot-product with transpose of the embedding params
 
     return x
 ```
@@ -177,11 +178,11 @@ class Embeddings(nn.Module):
 
     def __call__(self, x: Array, out: bool = False) -> Array:
         if not out:
-        x = self.embedding(x)
-      if self.is_mutable_collection("params"):
+            x = self.embedding(x)
+            if self.is_mutable_collection("params"):
                 _ = self.norm(x)
-      else:
-      x = self.norm(x)
+        else:
+            x = self.norm(x)
             x = self.embedding.attend(x)
         return x
 ```
@@ -197,7 +198,7 @@ class Dense(nn.Module):
 
     @nn.compact
     def __call__(self, x: Array):
-      x = nn.Dense(features=self.features, dtype=self.dtype)(x)
+        x = nn.Dense(features=self.features, dtype=self.dtype)(x)
         return x
 ```
 
@@ -243,7 +244,7 @@ $$
 0 & 0& \ldots & \ldots & & \cos(m\theta_{d/2}) & -\sin(m\theta*{d/2}) \\
 0 & 0 & \ldots & \ldots & & \sin(m\theta*{d/2}) & \cos(m\theta*{d/2})
 \end{bmatrix}
-}*{\displaystyle R(m) \;=\; \mathrm{blockdiag}\big(R(m\theta*1),\ldots,R(m\theta*{d/2})\big)}
+}*
 \begin{bmatrix}
 x_1 \\
 x_2 \\
@@ -262,7 +263,7 @@ R(m\theta_k) =
 \end{bmatrix}.
 $$
 
-Equivalently, in paired coordinates $((2k-1,\,2k))$:
+Equivalently, in paired coordinates $(2k-1,2k)$:
 
 $$
 \begin{bmatrix}
@@ -385,13 +386,13 @@ In the forward pass, $x$ is batched across $t$ time steps, allowing us to index 
 
 ```python
 def __call__(
-        self,
-        x: Array,
-        t_start: int,
-    ) -> Array:
-        B, T, C = x.shape
-        x_dtype = x.dtype
-        x = x.astype(jnp.float32)
+    self,
+    x: Array,
+    t_start: int,
+) -> Array:
+    B, T, C = x.shape
+    x_dtype = x.dtype
+    x = x.astype(jnp.float32)
 ```
 
 Since the $\cos$ Hadamard product requires the input `x`, we can perform that operation before turning our attention to the second operand.
@@ -713,7 +714,7 @@ class MLA(nn.Module):
         if use_rope:
             t_start = KV_cache.shape[1] if KV_cache is not None else 0
             x_k_r = Dense(features=self.dhR, dtype=self.model_dtype)(x)
-      x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
+            x_q_r = Dense(features=self.dhR * self.n_heads, dtype=self.model_dtype)(x)
 
             rope_k = RoPE(
                 model_dim=self.dhR, T=self.T
@@ -732,7 +733,6 @@ class MLA(nn.Module):
             if KV_cache is not None:
                 kv_latent = jnp.concatenate([KV_cache, kv_latent], axis=1)
             KV_cache = kv_latent
-
 
             if use_rope:
                 if KR_cache is not None:
