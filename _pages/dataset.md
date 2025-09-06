@@ -152,7 +152,7 @@ class Dataset:
         return file_obj
 ```
 
-The second function, is wrapper around the first function. If the call to `download_blob_to_stream` is successful, then the result is returned, else the function is re-called after a 5 second wait.
+The second function is wrapper around the first function. If the call to `download_blob_to_stream` is successful, then the result is returned, else the function is re-called after a 5 second wait.
 
 ```python
 class Dataset:
