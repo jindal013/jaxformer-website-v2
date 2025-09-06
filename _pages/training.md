@@ -3,7 +3,7 @@ layout: distill
 title: "Final Run and Training Results"
 permalink: /training/
 description: "We now write the launch scripts and launch the final run, showcasing how to use multi-controller JAX to conduct large scale, multi-host training runs."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false
@@ -35,12 +35,12 @@ authors:
 toc:
   - name: Final Run Scripts
   - subsections:
-    - name: Launcher and Run Scripts
-    - name: Cluster Setup and Config
+      - name: Launcher and Run Scripts
+      - name: Cluster Setup and Config
   - name: Training Results
   - subsections:
-    - name: Loss and Token Throughput
-    - name: Expert Utilization and Auxiliary Loss
+      - name: Loss and Token Throughput
+      - name: Expert Utilization and Auxiliary Loss
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.

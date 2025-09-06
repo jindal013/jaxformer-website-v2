@@ -3,7 +3,7 @@ layout: distill
 title: "Distributed Training: Scaling Transformers in Practice"
 permalink: /distributed_training/
 description: "We now introduce the main training script that will be used to launch the training. This covers the infrastructure, distributed functions and training loops that will sync all devices together."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false
@@ -129,7 +129,7 @@ def init_devices(
 
 ## Training Infrastructure
 
-With the helper functions established, we can now begin the `main` training loop function. Our main function will take in the `config` we described earlier.  Since we are assuming this script is for `3-D` parallelism, we can assign variables to the device size for each axis and setup the key with the initial seed.
+With the helper functions established, we can now begin the `main` training loop function. Our main function will take in the `config` we described earlier. Since we are assuming this script is for `3-D` parallelism, we can assign variables to the device size for each axis and setup the key with the initial seed.
 
 ```python
 def main(cfg: config):
@@ -394,7 +394,7 @@ loss_cross = jax.lax.pmean(loss_cross, axis_name="tp")
 loss_cross = jax.lax.pmean(loss_cross, axis_name="pp")
 ```
 
-We can make a dict of metrics and return that as well.  This will be useful when we have to log stats on MoE.
+We can make a dict of metrics and return that as well. This will be useful when we have to log stats on MoE.
 
 ```python
 metrics = {

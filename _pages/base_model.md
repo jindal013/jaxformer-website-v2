@@ -3,7 +3,7 @@ layout: distill
 title: "How to Write the Base Model"
 permalink: /base_model/
 description: "We begin by writing the single-TPU base model including modern day modules such as RMSNorm, Multi-latent Attention, RoPE, decoupled RoPE embeddings, interleaved attention, KV-cache and more. This serves as a working foundation, from which we can later scale to multi-TPU and distributed training setups."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false
@@ -35,23 +35,23 @@ authors:
 toc:
   - name: Root-Mean Squared Norm
   - name: Embedding
-  - subsections: 
-    - name: Embedding Lookup
-    - name: Weight Tying
+  - subsections:
+      - name: Embedding Lookup
+      - name: Weight Tying
   - name: FeedForward
   - name: RoPE
-  - subsections: 
-    - name: Mathematical Intuition
-    - name: Implementation in JAX
+  - subsections:
+      - name: Mathematical Intuition
+      - name: Implementation in JAX
   - name: Multi-Latent Attention
-  - subsections: 
-    - name: Low-Rank Attention Motivation
-    - name: Implementation and Caching
+  - subsections:
+      - name: Low-Rank Attention Motivation
+      - name: Implementation and Caching
   - name: Interleaved Attention Layers
   - name: Transformer Model
-  - subsections: 
-    - name: Forward Pass and Caching
-    - name: Configuration and Initialization
+  - subsections:
+      - name: Forward Pass and Caching
+      - name: Configuration and Initialization
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
@@ -366,7 +366,7 @@ Then, we create a frequency array `[1,2,3,...,T]` which will scale our $\theta$.
 freq = jnp.arange(self.T, dtype=jnp.float32)[:, None] + 1
 ```
 
-To setup the $\theta$, we first create an array of the powers of the base that yield each $\theta$. Specifically, $\theta_i = B^{-2i/d}$ , so we can represent the array as 
+To setup the $\theta$, we first create an array of the powers of the base that yield each $\theta$. Specifically, $\theta_i = B^{-2i/d}$ , so we can represent the array as
 
 $$
 [\theta_1, \theta_2, \ldots, \theta_{d / 2}] = B^{-2/d \cdot [1,2,\ldots, d/2]}.
@@ -390,7 +390,7 @@ log_theta_base = jnp.log(10000.0)
 theta = jnp.exp(-2 * pos / self.model_dim * log_theta_base)
 ```
 
-Finally, we create the final array of $\cos$ and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be 
+Finally, we create the final array of $\cos$ and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be
 
 $$
 [[1 \theta_0, 1\theta_0 1\theta_1, \theta_1, \ldots, 1 \theta_{d/2} 1 \theta_{d/2}], \ldots, [T \theta_0, T \theta_0, \ldots, T \theta_{d/2}, T \theta_{d/2}]].

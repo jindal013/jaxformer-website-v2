@@ -3,7 +3,7 @@ layout: distill
 title: "Dataset Class and Config Files"
 permalink: /dataset/
 description: "When training large-scale models on TPU or GPU clusters, memory-efficient data loading is needed to avoid bottlenecks. Below is a walkthrough of a custom Dataset class designed to stream and preprocess data shards from a Google Cloud Storage Bucket, supported for data, pipeline and tensor parallelism."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false
@@ -34,15 +34,15 @@ authors:
 #   - please use this format rather than manually creating a markdown table of contents.
 toc:
   - name: The Dataset Class
-  - subsections: 
-    - name: Initialization and Setup
-    - name: Downloading Shards
-    - name: Processing Shards
-    - name: Iteration and Utilities
+  - subsections:
+      - name: Initialization and Setup
+      - name: Downloading Shards
+      - name: Processing Shards
+      - name: Iteration and Utilities
   - name: Configs
-  - subsections: 
-    - name: Config Classes
-    - name: Argument Parsing and Wrapper
+  - subsections:
+      - name: Config Classes
+      - name: Argument Parsing and Wrapper
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.

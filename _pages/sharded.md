@@ -3,7 +3,7 @@ layout: distill
 title: "Inside the Sharded Model:<br>3-D Parallelism"
 permalink: /sharded/
 description: "Here we discuss the 4 main parallelism techniques used for scaling LLMs: data parallelism, fully-sharded data parallelism (FSDP), pipeline parallelism and tensor parallelism. For each, we discuss their theory and a scalable implementation."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false

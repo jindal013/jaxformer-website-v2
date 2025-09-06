@@ -3,7 +3,7 @@ layout: distill
 title: "Tokenization at Scale"
 permalink: /tokenization/
 description: "This section describes how to efficiently tokenize large amounts of text via distributed computing on CloudTPUs and Python multiprocessing. We also expose an interface for shard checkpointing to handle unexpected interruptions in data uploading to GCP buckets. The script is adapted from Andrej Karpathy's NanoGPT project with optimizations to process data at a larger scale."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false

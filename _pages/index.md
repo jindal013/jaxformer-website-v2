@@ -4,7 +4,7 @@ title: "Jaxformer"
 subtitle: "Scaling Modern Transformers"
 permalink: /
 description: "This is a zero-to-one guide on scaling modern transformers with n-dimensional parallelism. Transformers have driven much of the deep learning revolution, yet no practical guide reflects SOTA architectures and the complexities of large-scale language modelling. While excellent resources such as DeepMind’s <a href='https://jax-ml.github.io/scaling-book/' target='_blank'>How to Scale Your Model</a> and HuggingFace’s <a href='https://huggingface.co/spaces/nanotron/ultrascale-playbook' target='_blank'>Ultra Scale Playbook</a> exist, a gap remains between theory and end-to-end implementation. We aim to bridge that gap by showing you how to scale a model from scratch (in Jax, with code) to current standards."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false

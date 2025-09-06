@@ -3,7 +3,7 @@ layout: distill
 title: "Implementing Mixture of Experts Layers"
 permalink: /moe/
 description: "Mixture of Experts (MoE) layers scale LLMs by routing tokens to a small subset of feedforward experts, reducing memory use while enabling larger models. Here we show an implementation as well as address the main training challenges such as stability, expert collapse, and accelerator efficiency."
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false
@@ -69,7 +69,7 @@ _styles: >
 
 ## Motivation and Challenges
 
-A recent advancement in scaling LLMs to larger networks has been through the introduction of Mixture of Experts (MoE) modules in the decoder.  Training MoE models are primarily difficult for 2 reasons. The first, is due to training stability. This involves ensuring each expert gets roughly the same number of tokens otherwise, it can lead to expert collapse. Luckily for us, the hard work is done and lots of open-source models provide strong training recipes that we can use. The second is training efficiency, as you want to ensure that you are utilizing your accelerators to their max, and they aren't idle while training. We will be writing MoE similar to the Deepseek V3 paper. Additionally, distributed techniques such as expert parallelism are not being included, but we provide a general overview on how to incorporate it.
+A recent advancement in scaling LLMs to larger networks has been through the introduction of Mixture of Experts (MoE) modules in the decoder. Training MoE models are primarily difficult for 2 reasons. The first, is due to training stability. This involves ensuring each expert gets roughly the same number of tokens otherwise, it can lead to expert collapse. Luckily for us, the hard work is done and lots of open-source models provide strong training recipes that we can use. The second is training efficiency, as you want to ensure that you are utilizing your accelerators to their max, and they aren't idle while training. We will be writing MoE similar to the Deepseek V3 paper. Additionally, distributed techniques such as expert parallelism are not being included, but we provide a general overview on how to incorporate it.
 
 {% include figure.liquid path="assets/img/moe/1.png" class="img-fluid" caption="MoE layer from DeepSeek V3" %}
 
@@ -80,10 +80,12 @@ We first begin by writing the router and layer module whilst integrating it into
 ### Scoring and All-Gather
 
 The router decides how to send each token by computing a score. In the DeepSeek-V3 paper, they describe the score of the $i$ expert for the $t$ token as
+
 $$
 s_{i,t} = \sigma \left(u_t^Te_i\right)
 $$
-where $\sigma$ is the Sigmoid activation function. This can essentially be written as a dense layer with no bias since our tokens are transposed by definition due to being row-wise vectors. For simplicity, we also include the bias in our score function even though it has been shown at larger scales $>100B$ params that they tend to cause training instabilities.  The vectors for each expert $e$ are known as the centroids, so the`Dense` network  can be described as one as well.
+
+where $\sigma$ is the Sigmoid activation function. This can essentially be written as a dense layer with no bias since our tokens are transposed by definition due to being row-wise vectors. For simplicity, we also include the bias in our score function even though it has been shown at larger scales $>100B$ params that they tend to cause training instabilities. The vectors for each expert $e$ are known as the centroids, so the`Dense` network can be described as one as well.
 
 The term centroids comes from the idea that we take the dot product with the center of mass of each expert and then select the top-$k$ tokens by similarity.
 
@@ -287,7 +289,7 @@ def scatter(..):
     expert_scores = jnp.swapaxes(expert_scores, 0, 1) # (B*T, k, n_experts)
 ```
 
- Since for each `k` only one field in `n_experts` is non-zero (as it was originally a one-hot encoding), we can take the max across `k` to determine, for every batch, which expert it is routed to and at what position. We subtract 1 to zero-index it. This is done by taking `jnp.max(position_in_expert, axis=1)`, where `axis=1` corresponds to the top-k routed experts. We can then apply `argsort` on `sorted_token_idx`, which performs an inverse permutation and restores the original arrangement of our batches.
+Since for each `k` only one field in `n_experts` is non-zero (as it was originally a one-hot encoding), we can take the max across `k` to determine, for every batch, which expert it is routed to and at what position. We subtract 1 to zero-index it. This is done by taking `jnp.max(position_in_expert, axis=1)`, where `axis=1` corresponds to the top-k routed experts. We can then apply `argsort` on `sorted_token_idx`, which performs an inverse permutation and restores the original arrangement of our batches.
 
 ```python
 def scatter(...):
@@ -380,23 +382,28 @@ def __call__(self, x, train=True):
 ### Auxiliary Loss
 
 In order to prevent expert collapse, DeepSeek-V3 adds an auxiliary loss to the main CE loss in order to penalize routing tokens to the same expert. The auxiliary loss is defined as
+
 $$
 L_e = \alpha \sum_{i=1}^{N} f_i P_i
 $$
+
 where $\alpha$ is a hyperparameter and $N$ is the number of experts. Then, $f_i, P_i$ are defined as follows
 
 $$
   f_i = \frac{N}{kT}  \sum_{t=1}^T \mathbb{1} (s_{i,t} \in \text{TopK}(\{ s_{j,t} \mid 1 \leq j \leq N \}, K))
 $$
+
 where $s_{i,t}$ is the unnormalized score, essentially counting how many times for that expert the score is in the top $k$ and $P_i$ is the sum of the normalized scores,
 
 $$
 P_i =  \frac{1}{T} \sum_{t=1}^T S_{i,t}
 
+
 $$
+
 where $S_{i,t} = \frac{s_{i,t}}{\sum_{j=1}^{N} s_{j,t}}$. Thus we can compute $f, P$ as a function and return it as a metric. This promotes a uniform distribution over experts since it penalizes each expert for being used more times ($f_i$ becomes larger).
 
- We first begin by computing $P$. We normalize the scores to get $S$, and then reshape into 2D arrays since we can treat `B` as a time dim. Then we need to sum over this batch/time dim (axis=0) and normalize by `T = B x T_batch`. Thus, $P$ will then be of shape `(n_experts, )`.
+We first begin by computing $P$. We normalize the scores to get $S$, and then reshape into 2D arrays since we can treat `B` as a time dim. Then we need to sum over this batch/time dim (axis=0) and normalize by `T = B x T_batch`. Thus, $P$ will then be of shape `(n_experts, )`.
 
 ```python
 class MoE(nn.Module):

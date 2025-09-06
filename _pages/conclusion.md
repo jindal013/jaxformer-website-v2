@@ -3,7 +3,7 @@ layout: distill
 title: "Conclusion: Summary and Future Extensions"
 permalink: /conclusion/
 description: ""
-date: 2025-09-05
+date: 2025-09-06
 future: true
 htmlwidgets: true
 hidden: false
@@ -64,36 +64,36 @@ _styles: >
   }
 ---
 
-## Conclusion  
+## Conclusion
 
 Throughout this guide, we walked step-by-step through building a modern, scalable transformer model in JAX, focusing on both architectural advances and scaling practices.
 
 ### Article Summaries
 
-- Part 1: Tokenization — Efficient large-scale tokenization pipelines with sharding, checkpointing, and distributed uploads.  
-- Part 2: Base Model — Implementation of a single-GPU transformer with modern modules (RMSNorm, RoPE, MLA, KV-cache).  
-- Part 3: Sharded Model — A deep dive into 3-D parallelism (data, pipeline, and tensor) with practical JAX code.  
-- Part 4: Dataset & Config — Preparing datasets, configs, and orchestration for large-scale training.  
+- Part 1: Tokenization — Efficient large-scale tokenization pipelines with sharding, checkpointing, and distributed uploads.
+- Part 2: Base Model — Implementation of a single-GPU transformer with modern modules (RMSNorm, RoPE, MLA, KV-cache).
+- Part 3: Sharded Model — A deep dive into 3-D parallelism (data, pipeline, and tensor) with practical JAX code.
+- Part 4: Dataset & Config — Preparing datasets, configs, and orchestration for large-scale training.
 - Part 5: Distributed Training - Scaling across nodes with Cloud TPU clusters.
 - Part 6: Mixture of Experts - Implementing MoE layers (DeepSeek-style) with load balancing, stability tricks, and parallelism
 
-Together, these parts form a zero-to-one guide on how to scale transformers from a simple baseline to cutting-edge distributed training.  
+Together, these parts form a zero-to-one guide on how to scale transformers from a simple baseline to cutting-edge distributed training.
 
-### Future Directions  
+### Future Directions
 
 In the future, this can be extended further by using more novel methods such as replacing GPipe with DualPipe and incorporating higher dimensions of parallelism such as expert, and/or sequence. We can also extend the tokenziation process by streaming Parquet files over a distributed network.
 
-***How to get in touch:** leave a comment on any page, reach us on socials, or start a discussion thread on the Github repo.
+**\*How to get in touch:** leave a comment on any page, reach us on socials, or start a discussion thread on the Github repo.
 
 ### Authors & Contact
 
 We are all currently 1st and 2nd year undergraduate students at the University of Waterloo studying Computer Science.
 
-| Author           | Twitter / X                                                   | LinkedIn |
-|------------------|---------------------------------------------------------------|-------------------|
-| **Aditya Makkar** | [@AdityaMakkar000](https://x.com/AdityaMakkar000)             | [Aditya Makkar](https://www.linkedin.com/in/aditya-makkar-76a23a246/) |
-| **Divya Makkar**  | [@_DivyaMakkar](https://x.com/_DivyaMakkar)                   | [Divya Makkar](https://www.linkedin.com/in/divya-makkar000/) |
-| **Chinmay Jindal**| [@chinmayjindal_](https://x.com/chinmayjindal_)               | [Chinmay Jindal](https://www.linkedin.com/in/chinmayjindal/) |
+| Author             | Twitter / X                                       | LinkedIn                                                              |
+| ------------------ | ------------------------------------------------- | --------------------------------------------------------------------- |
+| **Aditya Makkar**  | [@AdityaMakkar000](https://x.com/AdityaMakkar000) | [Aditya Makkar](https://www.linkedin.com/in/aditya-makkar-76a23a246/) |
+| **Divya Makkar**   | [@\_DivyaMakkar](https://x.com/_DivyaMakkar)      | [Divya Makkar](https://www.linkedin.com/in/divya-makkar000/)          |
+| **Chinmay Jindal** | [@chinmayjindal\_](https://x.com/chinmayjindal_)  | [Chinmay Jindal](https://www.linkedin.com/in/chinmayjindal/)          |
 
 ### Links
 
