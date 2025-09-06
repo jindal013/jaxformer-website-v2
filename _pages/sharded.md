@@ -165,7 +165,7 @@ When visualizing the output, the following is shown where c remains the same sum
 
 {% include figure.liquid path="assets/img/sharded/2.png" class="img-fluid" %}
 
-That concludes an introduction to distributed training in JAX. These principles are then scaled up across higher-dimensional arrays to form the basis of modern distributed techniques including data, pipeline and tensor parallelism.
+That concludes an introduction to distributed training in JAX. These principles are then scaled across higher-dimensional arrays to form the basis of modern distributed techniques including data, pipeline and tensor parallelism.
 
 ## Data Parallelism
 
@@ -235,7 +235,7 @@ def __call__(self, x: Array) -> Array:
     kernel = jax.lax.all_gather(kernel, "dp", axis=-1, tiled=True)
 ```
 
-There are a few unanswered questions left here, such as how do we split the parameters after they are made, or how do we prevent JAX from storing the activation in memory for the backward pass (and thus eliminating the benefits of FSDP). These will be answered below but, assuming we are able to spilt the parameters (each kernel) across the `dp` axis`(x.shape[-1], self.features / dp.size)`, we are able to perform the desired FSDP operation. The rest of the `Dense` remains the same for now (Tensor Parallelism requires further operations). Therefore our Dense is:
+There are a few unanswered questions left, such as how do we split the parameters after they are made, or how do we prevent JAX from storing the activations in memory for the backward pass (which eliminates the benefits of FSDP). These will be answered below but, assuming we are able to spilt the parameters (each kernel) across the `dp` axis `(x.shape[-1], self.features / dp.size)`, we are able to perform the desired FSDP operation. The rest of the `Dense` class remains the same for now (Tensor Parallelism requires further operations). Therefore our Dense is:
 
 ```python
 class Dense(nn.Module):
@@ -273,7 +273,7 @@ class Dense(nn.Module):
 
 ## Pipeline Parallelism
 
-Pipeline parallelism is another parallelism technique that allows for training LLMs across distributed nodes. While data parallelism, works well for smaller to intermediate models, when the model size increases, it becomes difficult to scale as the model can no longer fit on a single device. Hence, in such cases, strategies that parallelize the model instead of the data need to be used. In pipeline parallelism, the model is split vertically. This means the layers of the model are partitioned on different devices, for example, a transformer with 16 layers and 4 homogenous devices are split evenly (4 consecutive layers per device). The input batch passes through the first device with the first `n` layers, then the output of that device is passed to the next device through the next `n` layers and etc. The backwards pass is formed in the opposite direction from the last device, computing the gradient for the last `n` layers, then computing the back propagation through the next device and etc. Pipeline Parallelism is advantageous because each device requires a portion of the model, allowing for more scaling as memory requirements are reduced. Due to the nature of this parallelism, the following computation graph can be created.
+Pipeline parallelism is another parallelism technique that allows for training LLMs across distributed nodes. While data parallelism works well for smaller to intermediate models, when the model size increases, it becomes difficult to scale as the model can no longer fit on a single device. Hence, in such cases, strategies that parallelize the model instead of the data need to be used. In pipeline parallelism, the model is split vertically. This means the layers of the model are partitioned on different devices, for example, a transformer with 16 layers and 4 homogenous devices are split evenly (4 consecutive layers per device). The input batch passes through the first device with the first `n` layers, then the output of that device is passed to the next device through the next `n` layers and etc. The backwards pass is formed in the opposite direction from the last device, computing the gradient for the last `n` layers, then computing the back propagation through the next device and etc. Pipeline Parallelism is advantageous because each device requires a portion of the model, allowing for more scaling as memory requirements are reduced. Due to the nature of this parallelism, the following computation graph can be created.
 
 {% include figure.liquid path="assets/img/sharded/5.png" class="img-fluid" caption="Naive Pipeline Parallelism" %}
 
@@ -291,7 +291,7 @@ $$
 \frac{(n-1+1)(n-1)}{2} = \frac{n^2 - n}{2} = \frac{n(n-1)}{2}
 $$
 
-The top right bubble is calculated as twice the top left bubble as the magnitude of time the backwards pass takes is twice that of the forwards pass. Hence, the top left bubble is $n(n-1)$. It is trivial to prove that the center bubbles are equal to the sum of the top left and top right bubbles, hence the final bubbles sum can be computed as:
+The top right bubble is calculated as twice the top left bubble, as the magnitude of time the backwards pass takes is twice that of the forwards pass. Hence, the top left bubble is $n(n-1)$. It is trivial to prove that the center bubbles are equal to the sum of the top left and top right bubbles, hence the final bubbles sum can be computed as:
 
 $$
 2\frac{n(n-1)}{2} + 2n(n-1) = n(n-1) + 2n(n-1) = 3n(n-1)
@@ -307,23 +307,23 @@ It is evident that as n gets larger, the fraction of time wasted approaches 1, s
 
 {% include figure.liquid path="assets/img/sharded/8.png" class="img-fluid" caption="Bubble Image with GPipe" %}
 
-To calculate the total bubble ration we can use the same procedure as above to calculate the total bubble time as:
+To calculate the total bubble ratio, we can use the same procedure as above to calculate the total bubble time as:
 
 $$
 2\frac{n(n-1)}{2} + 2n(n-1) = n(n-1) + 2n(n-1) = 3n(n-1)
 $$
 
-The total time taken is equivalent to the total area which is $n * 3(n+m-1)$ since in each the forward pass we have to do $n+m-1$ passes and twice that in the backwards pass. When dividing the two, we get:
+The total time taken is equivalent to the total area which is $n * 3(n+m-1)$ since in each forward pass, we have to do $n+m-1$ passes and twice that in the backwards pass. When dividing the two, we get:
 
 $$
 \frac{3n(n-1)}{3n(n +m-1)} = \frac{n-1}{n+m-1}
 $$
 
-Note that when $m = 1$, this equation becomes the same equation above. So, increasing the size of the mini batches, results in a smaller ratio of bubble-time wasted; however, we cannot infinitely increase the mini batch size because that will result in an underutilization of the GPUs and increase in communication costs, so we must maintain a balance between the two. GPipe papers have that when $m \geq 4n$ the communication cost becomes negligible.
+Note that when $m = 1$, this equation becomes the same equation above. So, increasing the size of the mini batches, results in a smaller ratio of bubble-time wasted; however, we cannot infinitely increase the mini batch size because that will result in an underutilization of the GPUs and increase in communication costs, so we must maintain a balance between the two. GPipe papers have that when $m \geq 4n$, the communication cost becomes negligible.
 
 There are two main challenges when implementing pipeline. The first is the actual forward/backward pass and the second is setting up the parameters. We begin by setting up the parameters.
 
-Currently, our parameters are represented as a JAX PyTree (any Python data structure such as a list, tuple, or dictionary whose children are JAX arrays), specifically as a dictionary where the module keys serve as paths. For example if we want the first down block for the MLA, we can do `params['Block_0']['Layer_0']['MLA_0']['Dense_0'] = {'kernel': Array(...), 'bias': Array(...)}`. Now when we have a PyTree and use sharding functions (i.e `jax.device_put`) it maps over the tree hence if `p` is some PyTree, `jax.device_put(p, NamedSharding(...)) = jax.tree.map(lambda x: jax.device_put(x, NamedSharding(...)), p)`. This leads to a problem with the current Transformer class since it's parameters are sequential, meaning it may have keys `Block_0`, `Block_1`, ... `Block_n` where we want to shard the first `n/pp_size` blocks on the first device, then the blocks from `n/pp_size + 1, 2n/pp_size` on the second device and so on. One way to fix this and make it more natural in JAX is to consider partitioning only across the Blocks. Then since each of the params in `Block_0`, `Block_1`, ... ,`Block_n` are identical (they all have the layers defined), we can create the parameter dictionary as one block with all the parameters stacked. This allows the parameters to be sharded across the pipeline axis. Instead of having `params = {'Block_0': {...}, ... 'Block_n': {...}}`, we now have `params = {'Block_0': {...}}`, where each block includes a leading axis. For example, instead of a kernel having the shape `(4, 8)`, it now has the shape `(L, 4, 8)`, where `L` is the number of layers in the model.
+Currently, our parameters are represented as a JAX PyTree (any Python data structure such as a list, tuple, or dictionary whose children are JAX arrays), specifically as a dictionary where the module keys serve as paths. For example if we want the first down block for the MLA, we can do `params['Block_0']['Layer_0']['MLA_0']['Dense_0'] = {'kernel': Array(...), 'bias': Array(...)}`. Now when we have a PyTree and use sharding functions (i.e `jax.device_put`) it maps over the tree hence if `p` is some PyTree, `jax.device_put(p, NamedSharding(...)) = jax.tree.map(lambda x: jax.device_put(x, NamedSharding(...)), p)`. This leads to a problem with the current Transformer class since it's parameters are sequential, meaning it may have keys `Block_0`, `Block_1`, ... `Block_n` where we want to shard the first `n/pp_size` blocks on the first device, then the blocks from `n/pp_size + 1, 2n/pp_size` on the second device and so on. One way to fix this and make it more natural in JAX is to consider partitioning only across the Blocks. Then since each of the params in `Block_0`, `Block_1`, ... ,`Block_n` are identical (they all have the layers defined), we can create the parameter dictionary as one block with all the parameters stacked. This allows the parameters to be sharded across the pipeline axis. Instead of having `params = {'Block_0': {...}, ..., 'Block_n': {...}}`, we now have `params = {'Block_0': {...}}`, where each block includes a leading axis. For example, instead of a kernel having the shape `(4, 8)`, it now has the shape `(L, 4, 8)`, where `L` is the number of layers in the model.
 
 To begin writing this out, we can create a new class called `ShardedModel` which will be used to implement all the sharded features. In the constructor, we can split the embedding and block into two separate components since we will want to manipulate the parameters of the block independent of the embedding module.
 
@@ -355,7 +355,7 @@ Before we can write the initialization method for the weights, we need to have s
 
 To do this efficiently, we use the `jax.eval_shape` function, which returns the shapes of a function’s outputs. Since we do not care about the actual values, only the dimensions, we can use these shapes to construct the final PyTree structure and the PartitionSpec.
 
-The function first takes a few variables that are needed to make the mock data such as the sequence length `T` and the number of layers and number of devices. It then sets up the mock data and a key needed for the `init` methods which generate the fake parameters (again fake because we aren't actually going to use these parameters it just tells us the structure we are working with).
+The function first takes a few variables that are needed to make the mock data such as the sequence length `T`, the number of layers and number of devices. It then sets up the mock data and a key needed for the `init` methods which generate the fake parameters (again fake because we aren't actually going to use these parameters it just tells us the structure we are working with).
 
 ```python
 class shardedModel:
@@ -445,13 +445,13 @@ We can then now begin writing the `init_weights` method. It will follow in simil
 class shardedModel:
 
   def init_weights(self, key, mesh):
-    out_spec = shardedModel.get_p_spec([self.embedding, self.block], mesh, self.cfg)
-    def replace_fsdp(p: jax.sharding.PartitionSpec):
-            if p[-1] == "dp":
-                p = P(*p[:-1], None) # remove None from last position
-            return p
+      out_spec = shardedModel.get_p_spec([self.embedding, self.block], mesh, self.cfg)
+      def replace_fsdp(p: jax.sharding.PartitionSpec):
+          if p[-1] == "dp":
+              p = P(*p[:-1], None) # remove None from last position
+          return p
 
-        out_spec_no_fsdp = jax.tree.map(lambda x: replace_fsdp(x), out_spec)
+      out_spec_no_fsdp = jax.tree.map(lambda x: replace_fsdp(x), out_spec)
 ```
 
 We can then prepare our init variables, namely our mock data and unique keys for each layer to ensure that each layer being created is not an identical copy.
