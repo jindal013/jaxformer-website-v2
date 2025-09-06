@@ -41,6 +41,7 @@ toc:
   - name: Prerequisites
   - name: Goals
   - name: Overview
+  - name: Why This Matters
 
 # Below is an example of injecting additional post-specific styles.
 # This is used in the 'Layouts' section of this post.
