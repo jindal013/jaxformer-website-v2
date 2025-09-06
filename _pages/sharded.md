@@ -85,7 +85,7 @@ from jax.sharding import NamedSharding
 from jax.experimental.shard_map import shard_map
 ```
 
-The configuration of these devices can be shown by calling `jax.devices()` which returns
+The configuration of these devices can be shown by calling `jax.devices()` which returns:
 
 ```python
 [CpuDevice(id=0),
@@ -104,7 +104,7 @@ Before explicitly sharding tensors across devices, we can create a `jax.sharding
 mesh = jax.make_mesh((2,4), ('x', 'y'))
 ```
 
-Now, to demonstrate sharded vector addition across 8 distinct devices, we can begin allocating two vectors a and b, which are reshaped to be of the same configuration as the device grid, and an element-wise addition function to be called on each individual device.
+Now, to demonstrate sharded vector addition across 8 distinct devices, we can begin allocating two vectors a and b, which are reshaped to be of the same configuration as the device grid and an element-wise addition function to be called on each individual device.
 
 ```python
 a = jnp.arange(8).reshape(2,4)
