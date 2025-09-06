@@ -35,21 +35,21 @@ authors:
 toc:
   - name: Root-Mean Squared Norm
   - name: Embedding
-  - subsections: 
+  - subsections:
     - name: Embedding Lookup
     - name: Weight Tying
   - name: FeedForward
   - name: RoPE
-  - subsections: 
+  - subsections:
     - name: Mathematical Intuition
     - name: Implementation in JAX
   - name: Multi-Latent Attention
-  - subsections: 
+  - subsections:
     - name: Low-Rank Attention Motivation
     - name: Implementation and Caching
   - name: Interleaved Attention Layers
   - name: Transformer Model
-  - subsections: 
+  - subsections:
     - name: Forward Pass and Caching
     - name: Configuration and Initialization
 
@@ -271,7 +271,7 @@ x_d
 \end{bmatrix}
 $$
 
-where $m$ is the time position and each $( 2 \times 2)$ $R(m)$ block is
+where $m$ is the time position. We can also define $R(m \theta_k)$ block as
 
 $$
 R(m\theta_k) =
@@ -281,16 +281,16 @@ R(m\theta_k) =
 \end{bmatrix}.
 $$
 
-Equivalently, in paired coordinates $(2k-1,2k)$:
+and then in paired coordinates $(2k-1,2k)$:
 
 $$
 \begin{bmatrix}
-x'_{2k-1}\\[2pt] x'_{2k}
+x'_{2k-1}\\ x'_{2k}
 \end{bmatrix}
 =
-R(m\theta*k)
+R(m\theta_k)
 \begin{bmatrix}
-x*{2k-1}\\[2pt] x\_{2k}
+x_{2k-1}\\ x_{2k}
 \end{bmatrix},
 \qquad k=1,\dots,\tfrac{d}{2}.
 $$
@@ -366,7 +366,7 @@ Then, we create a frequency array `[1,2,3,...,T]` which will scale our $\theta$.
 freq = jnp.arange(self.T, dtype=jnp.float32)[:, None] + 1
 ```
 
-To setup the $\theta$, we first create an array of the powers of the base that yield each $\theta$. Specifically, $\theta_i = B^{-2i/d}$ , so we can represent the array as 
+To setup the $\theta$, we first create an array of the powers of the base that yield each $\theta$. Specifically, $\theta_i = B^{-2i/d}$ , so we can represent the array as
 
 $$
 [\theta_1, \theta_2, \ldots, \theta_{d / 2}] = B^{-2/d \cdot [1,2,\ldots, d/2]}.
@@ -390,7 +390,7 @@ log_theta_base = jnp.log(10000.0)
 theta = jnp.exp(-2 * pos / self.model_dim * log_theta_base)
 ```
 
-Finally, we create the final array of $\cos$ and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be 
+Finally, we create the final array of $\cos$ and $\sin$ by broadcasting each channel dim across every time step $t$ where each $\theta$ now becomes $t\theta$. The final array will therefore be
 
 $$
 [[1 \theta_0, 1\theta_0 1\theta_1, \theta_1, \ldots, 1 \theta_{d/2} 1 \theta_{d/2}], \ldots, [T \theta_0, T \theta_0, \ldots, T \theta_{d/2}, T \theta_{d/2}]].

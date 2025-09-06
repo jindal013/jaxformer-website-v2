@@ -392,8 +392,8 @@ where $s_{i,t}$ is the unnormalized score, essentially counting how many times f
 
 $$
 P_i =  \frac{1}{T} \sum_{t=1}^T S_{i,t}
-
 $$
+
 where $S_{i,t} = \frac{s_{i,t}}{\sum_{j=1}^{N} s_{j,t}}$. Thus we can compute $f, P$ as a function and return it as a metric. This promotes a uniform distribution over experts since it penalizes each expert for being used more times ($f_i$ becomes larger).
 
  We first begin by computing $P$. We normalize the scores to get $S$, and then reshape into 2D arrays since we can treat `B` as a time dim. Then we need to sum over this batch/time dim (axis=0) and normalize by `T = B x T_batch`. Thus, $P$ will then be of shape `(n_experts, )`.
