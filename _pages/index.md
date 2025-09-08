@@ -125,7 +125,7 @@ Here's how the guide is structured:
 - **[Part 2: Base Model](base_model)** — building a transformer in JAX with modules like RMSNorm, RoPE, and Multi-latent Attention.
 - **[Part 3: Sharded Model](sharded)** — introducing parallelism strategies (data, tensor, pipeline, FSDP) and applying them to transformer layers.
 - **[Part 4: Distributed Training](distributed_training)** — how to set up TPU/GPU clusters, manage checkpoints, and synchronize training loops.
-- **[Part 5: Dataset & Configs](dataset_class)** — structured configs for datasets, hyperparameters, and runtime options.
+- **[Part 5: Dataset & Configs](dataset)** — structured configs for datasets, hyperparameters, and runtime options.
 - **[Part 6: Mixture of Experts](moe)** — implementing and training MoE layers, covering routing, stability, and efficiency challenges.
-- **[Part 7: Final Run](final_run)** — putting it all together: multi-host scripts, launching large runs across TPU pods, and analyzing results.
+- **[Part 7: Final Run](training)** — putting it all together: multi-host scripts, launching large runs across TPU pods, and analyzing results.
 - **[Part 8: Conclusions](conclusion)** — lessons learned, future directions like DualPipe and expert parallelism, and additional resources.
